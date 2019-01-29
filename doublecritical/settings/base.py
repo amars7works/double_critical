@@ -31,6 +31,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -99,10 +101,10 @@ USE_L10N = True
 
 USE_TZ = True
 
-#Restframework
+#Rest_framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'utils.exempt.CsrfExemptSessionAuthentication',  
+        'utils.exempt.CsrfExemptSessionAuthentication',
     )
 }
 
