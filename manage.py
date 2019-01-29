@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+import os
+import sys
+
+from decouple import config
+
+def get_env_variable(var_name):
+    try:
+        return os.environ[var_name]
+    except KeyError:
+        print("Set the %s environment variable" % (var_name))
+        print("Current environment set to local")
+
+
+if __name__ == "__main__":
+  DJANGO_EXECUTION_ENVIRONMENT = get_env_variable('DJANGO_EXECUTION_ENVIRONMENT')
+  if DJANGO_EXECUTION_ENVIRONMENT == 'STAGING':
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "doublecritical.settings.staging")
+  elif DJANGO_EXECUTION_ENVIRONMENT == 'PRODUCTION':
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "doublecritical.settings.production")
+  else:
+    if not DJANGO_EXECUTION_ENVIRONMENT:
+      os.environ.setdefault("DJANGO_EXECUTION_ENVIRONMENT", 'LOCAL')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", config('DJANGO_SETTINGS_MODULE', default=None))
+
+  from django.core.management import execute_from_command_line
+  execute_from_command_line(sys.argv)
