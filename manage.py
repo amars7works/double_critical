@@ -13,6 +13,10 @@ def get_env_variable(var_name):
 
 
 if __name__ == "__main__":
+  '''
+    This tells django which settings file to use, depending on 
+    the value of the DJANGO_EXECUTION_ENVIRONMENT variable.
+  '''
   DJANGO_EXECUTION_ENVIRONMENT = get_env_variable('DJANGO_EXECUTION_ENVIRONMENT')
   if DJANGO_EXECUTION_ENVIRONMENT == 'STAGING':
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "doublecritical.settings.staging")

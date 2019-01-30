@@ -21,7 +21,10 @@ def get_env_variable(var_name):
         print("Set the %s environment variable" % (var_name))
         print("Current environment set to local")
 
-
+'''
+	This tells django which settings file to use, depending on 
+	the value of the DJANGO_EXECUTION_ENVIRONMENT variable.
+'''
 DJANGO_EXECUTION_ENVIRONMENT = get_env_variable('DJANGO_EXECUTION_ENVIRONMENT')
 
 if DJANGO_EXECUTION_ENVIRONMENT == 'STAGING':
