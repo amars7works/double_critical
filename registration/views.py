@@ -1,11 +1,15 @@
+from django.core.mail import send_mail
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.decorators import api_view
 
 from .models import Profile
 from .custom_signals import post_registration_notify
@@ -13,9 +17,9 @@ from .serializers import UserProfileSerializer
 
 class Login(APIView):
 	def post(self, request, format="json"):
-		email = request.data.get('email')
+		username = request.data.get('username')
 		password = request.data.get('password')
-		user = authenticate(request, email=email, password=password)
+		user = authenticate(request, username=username, password=password)
 		if user:
 			login(request,user)
 			return Response({"user_status":user.is_authenticated(),
@@ -47,3 +51,57 @@ class UserCreate(APIView):
 				)
 				return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def generate_otp():
+	otp = get_random_string(4, allowed_chars='0123456789')
+	return otp
+
+@api_view(['POST'])
+def forgot_password(request, format="json"):
+	email = request.data.get('email', None)
+	try:
+		user_obj = Profile.objects.get(user__email=email)
+		otp = user_obj.otp
+		if not otp:
+			otp = generate_otp()
+		user_obj.__dict__.update(otp=otp)
+		user_obj.save()
+		message = """
+			Hi {},
+
+			{} is Ont Time Password to rest your Account
+
+			Sincerely,
+			Double Critical   
+			"""
+		message = message.format(user_obj.user.username, otp)
+		send_mail(
+			subject="One Time Password",
+			message = message,
+			from_email = "ananyadodda@gmail.com",
+			recipient_list = [email],
+			fail_silently = True  
+		)
+		print ('sent mail successfully')
+		return Response(status=status.HTTP_200_OK)
+	except ObjectDoesNotExist:
+		return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def reset_password(request, format="json"):
+	otp = request.data.get('otp', None)
+	email = request.data.get('email', None)
+	password = request.data.get('password', None)
+	try:
+		profile_obj = Profile.objects.get(user__email=email, otp=otp)
+		profile_obj.__dict__.update(otp=None)
+		profile_obj.save()
+
+		user_obj = User.objects.get(email=email)
+		user_obj.set_password(password)
+		user_obj.save()
+		return Response(status=status.HTTP_200_OK)
+	except ObjectDoesNotExist:
+		return Response(status=status.HTTP_400_BAD_REQUEST)
