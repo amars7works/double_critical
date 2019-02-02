@@ -37,6 +37,8 @@ class Profile(models.Model):
 				on_delete=models.CASCADE, 
 				related_name='state')
 
+	provinence = models.CharField(max_length=25, blank=True, null=True)
+
 	country  = models.ForeignKey(Country, 
 				on_delete=models.CASCADE, 
 				related_name='country')
