@@ -35,8 +35,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Profile
 		fields = ('id','username','email','password', 'date_of_birth',
-					'state', 'country_name', 'country_code',
-					'terms_conditions', 'newsletter')
+					'state', 'country',	'terms_conditions', 'newsletter')
 
 	def create(self,validated_data):
 		user_data = validated_data.pop('user')
@@ -49,8 +48,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 		user.email = validated_data.get('email',user.email)
 		user.save()
 		instance.date_of_birth = validated_data.get('date_of_birth',instance.date_of_birth)
-		instance.country_code = validated_data.get('country_code', instance.country_code)
-		instance.country_name = validated_data.get('country_name', instance.country_name)
+		instance.country = validated_data.get('country', instance.country)
 		instance.state = validated_data.get('state', instance.state)
 		instance.newsletter = validated_data.get('newsletter', instance.newsletter)
 		instance.save()

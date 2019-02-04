@@ -35,6 +35,7 @@ INSTALLED_APPS = (
     'rest_framework',
     
     'registration',
+    'game',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -119,3 +120,11 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+#Email (Mailjet)
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'in-v3.mailjet.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'c0a7b6a5279d91bd85df2f6a16426596'
+EMAIL_HOST_PASSWORD = 'fa1a72de86373de2d4a5fa6ef970be3c'
+DEFAULT_FROM_EMAIL = 'dealswallet.com@gmail.com'
