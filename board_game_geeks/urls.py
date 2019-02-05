@@ -1,4 +1,4 @@
-"""doublecritical URL Configuration
+"""board_game_geeks URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.11/topics/http/urls/
@@ -16,12 +16,12 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from registration import urls as registrationUrls
-from game import urls as gameUrls
+from bgg import urls as bggUrls
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include(registrationUrls)),
-    url(r'^game', include(gameUrls)),
+    url(r'^bgg', include(bggUrls)),
 
 ]

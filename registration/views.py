@@ -67,14 +67,14 @@ class ForgotPassword(APIView):
 			profile_obj.__dict__.update(otp=otp)
 			profile_obj.save()
 			message = """
-				Hi {},
+				Hi %s,
 
-				{} is Ont Time Password to rest your Account
+				%s is Ont Time Password to rest your Account
 
 				Sincerely,
-				Double Critical   
+				Double Critical
 				"""
-			message = message.format(profile_obj.user.username, otp)
+			message = message.format(profile_obj.user.username.capitalize(), otp)
 			send_mail(
 				subject="One Time Password",
 				message = message,
@@ -87,10 +87,6 @@ class ForgotPassword(APIView):
 			return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-# import os
-# os.environ['DJANGO_SETTINGS_MODULE'] = 'doublecritical.settings.local'
-
-#         )
 class ResetPassword(APIView):
 	def post(self, request, format="json"):
 		otp = request.data.get('otp', None)

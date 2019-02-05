@@ -33,6 +33,8 @@ class Profile(models.Model):
 
 	terms_conditions = models.BooleanField(default=False)
 	newsletter = models.BooleanField(default=False)
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+	updated_at = models.DateTimeField(auto_now=True, null=True)
 
 	def __str__(self):
 		return self.user.username

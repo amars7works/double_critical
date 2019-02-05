@@ -5,10 +5,9 @@ from registration.models import Country
 
 sys.path.append("/home/BGG/double-critical/")
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'doublecritical.settings.local'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'board_game_geeks.settings.local'
 
 django.setup()
-
 
 data = csv.reader(open("data.csv", 'r'))
 for row in data:
