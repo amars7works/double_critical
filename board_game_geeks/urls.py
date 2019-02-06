@@ -22,6 +22,6 @@ from bgg import urls as bggUrls
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include(registrationUrls)),
-    url(r'^bgg', include(bggUrls)),
+    url(r'^bgg/', include(bggUrls)),
 
 ]

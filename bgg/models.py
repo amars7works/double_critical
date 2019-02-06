@@ -71,90 +71,97 @@ class Game(models.Model):
 
 
 class GameFollow(models.Model):
-	FOLLOW = (
-		(True,'TRUE'),
-		(False,'FALSE')
-		)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
-	follow_game = models.BooleanField(
-				choices=FOLLOW,
-				default=False
-				)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
-	updated_at = models.DateTimeField(auto_now=True, null=True)
-
-	def __str__(self):
-		return self.user.username
-
-
-class GameComment(models.Model):
-	user = models.ForeignKey(User, on_delete=models.CASCADE)
-	game = models.ForeignKey(Game, on_delete=models.CASCADE)
-	game_comments = models.TextField(blank=True,null=True)
-	created_at = models.DateTimeField(auto_now_add=True, null=True)
-	updated_at = models.DateTimeField(auto_now=True, null=True)
 
 	def __str__(self):
 		return self.user.username
 
 
 class RateGame(models.Model):
-	user = models.ForeignKey(User, on_delete=models.CASCADE)
-	game = models.ForeignKey(Game, on_delete=models.CASCADE)
-	game_rating = models.IntegerField(null=True)
-	created_at = models.DateTimeField(auto_now_add=True, null=True)
-	updated_at = models.DateTimeField(auto_now=True, null=True)
-
-	def __str__(self):
-		return self.user.username
-
-
-class Collection(models.Model):
-	user = models.ForeignKey(User, on_delete=models.CASCADE)
-	game = models.ForeignKey(Game, on_delete=models.CASCADE)
-	created_at = models.DateTimeField(auto_now_add=True, null=True)
-	updated_at = models.DateTimeField(auto_now=True, null=True)
-
-	def __str__(self):
-		return self.user.username
-
-
-class UGCComment(models.Model):
-	LIKE = (
-		(True,'TRUE'),
-		(False,'FALSE')
+	GAME_RATING = (
+		('select', '------'),
+		('love','LOVE'),
+		('like','LIKE'),
+		('dislike','DISLIKE'),
+		('hate','HATE')
 		)
-
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
-	ugc_comments = models.TextField(blank=True,null=True)
-	comments_like = models.BooleanField(
-				choices=LIKE,
-				default=False
+	game_rating = models.CharField(
+				max_length=10,
+				choices=GAME_RATING,
+				default=None
 				)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
-	updated_at = models.DateTimeField(auto_now=True, null=True)
+
+	def __str__(self):
+		return self.user.username
+
+	class Meta:
+		unique_together = ('user', 'game')
+
+
+class GameCollection(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	game = models.ForeignKey(Game, on_delete=models.CASCADE)
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 	def __str__(self):
 		return self.user.username
 
 
 class UGC(models.Model):
-	LIKE = (
-		(True,'TRUE'),
-		(False,'FALSE')
-		)
-
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	ugc_title = models.CharField(max_length=30)
-	like = models.BooleanField(
-				choices=LIKE,
-				default=False
-				)
-	comments = models.ForeignKey(UGCComment, on_delete=models.CASCADE)
+	like_count = models.IntegerField(null=True)
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+	def __str__(self):
+		return self.id
+
+
+class UGCLike(models.Model):
+	LIKE_CHOICES = (
+		('+1', 'LIKE'),
+		('-1', 'DISLIKE'),
+		('0', 'NEUTRAL'))
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	ugc = models.ForeignKey(UGC, on_delete=models.CASCADE)
+	like_type = models.CharField(max_length=10,choices=LIKE_CHOICES, default='0')
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+	def __str__(self):
+		return self.user.username
+
+
+class UGCComment(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	game = models.ForeignKey(Game, on_delete=models.CASCADE)
+	ugc_comments = models.TextField(blank=True,null=True)
+	ugc = models.ForeignKey(UGC, on_delete=models.CASCADE)
+	
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 
 	def __str__(self):
+		return self.id
+
+
+class UGCCommentLike(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	ugc_comment = models.ForeignKey(UGCComment, on_delete=models.CASCADE)
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+	def __str__(self):
 		return self.user.username
+
+
+class FollowUser(models.Model):
+	follower = models.OneToOneField(User, null=True, related_name='follower')
+	following = models.OneToOneField(User, null=True, related_name='following')
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+	def __str__(self):
+		return self.follower.username
