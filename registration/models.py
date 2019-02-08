@@ -14,7 +14,7 @@ class Country(models.Model):
 	country_name = models.CharField(max_length=20)
 
 	def __str__(self):
-		return self.country_code
+		return self.country_name
 
 
 class Profile(models.Model):

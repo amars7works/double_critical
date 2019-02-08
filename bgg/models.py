@@ -2,30 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class GameExtend(models.Model):
-	expansion =models.TextField(max_length=60, null=True)
-	expands = models.TextField(null=True)
-	integrates_with = models.TextField(null=True)
-	contains = models.TextField(null=True)
-	contained_in = models.TextField(null=True)
-	reimplemented_by = models.TextField(null=True)
-	reimplements = models.TextField(null=True)
-	family = models.TextField(null=True)
-	video_game_adaptation = models.TextField(null=True)
-
-	def __str__(self):
-		return self.expansion
-
-
 class Game(models.Model):
 
 	STATUS_CHOICES = (
 		('review','REVIEW'),
 		('published','PUBLISHED')
-		)
-	HOTORNOT_CHOICES = (
-		(True,'TRUE'),
-		(False,'FALSE')
 		)
 	ORIGIN_CHOICES = (
 		('publisher', 'PUBLISHER'),
@@ -47,16 +28,12 @@ class Game(models.Model):
 	mechanism = models.CharField(max_length=60, null=True)
 	note_to_admin = models.TextField(null=True)
 	
-	extend = models.ForeignKey(
-				GameExtend, 
-				on_delete=models.CASCADE,
-				related_name='extend')
 	status = models.CharField(
 				choices = STATUS_CHOICES,
 				default='review',
 				max_length = 10
 				)
-	hotornot = models.BooleanField(default=False, choices = HOTORNOT_CHOICES)
+	hotornot = models.BooleanField(default=False)
 	upc = models.CharField(max_length=20)
 	origin = models.CharField(
 				choices=ORIGIN_CHOICES,
@@ -68,9 +45,32 @@ class Game(models.Model):
 
 	def __str__(self):
 		return self.name
+	
+	class Meta:
+		unique_together = ('name',)
 
+class GameExtend(models.Model):
+	game = models.OneToOneField(Game, on_delete=models.CASCADE,null=True)
+	expansion =models.TextField(max_length=60, null=True)
+	expands = models.TextField(null=True)
+	integrates_with = models.TextField(null=True)
+	contains = models.TextField(null=True)
+	contained_in = models.TextField(null=True)
+	reimplemented_by = models.TextField(null=True)
+	reimplements = models.TextField(null=True)
+	family = models.TextField(null=True)
+	video_game_adaptation = models.TextField(null=True)
 
-class GameFollow(models.Model):
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+	updated_at = models.DateTimeField(auto_now=True, null=True)
+
+	def __str__(self):
+		return self.expansion
+
+	class Meta:
+		unique_together = ('game',)
+
+class FollowGame(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -78,10 +78,12 @@ class GameFollow(models.Model):
 	def __str__(self):
 		return self.user.username
 
+	class Meta:
+		unique_together = ('user', 'game')
+
 
 class RateGame(models.Model):
 	GAME_RATING = (
-		('select', '------'),
 		('love','LOVE'),
 		('like','LIKE'),
 		('dislike','DISLIKE'),
@@ -111,15 +113,21 @@ class GameCollection(models.Model):
 	def __str__(self):
 		return self.user.username
 
+	class Meta:
+		unique_together = ('user', 'game')
+
 
 class UGC(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	ugc_title = models.CharField(max_length=30)
-	like_count = models.IntegerField(null=True)
+	like_count = models.IntegerField(blank=True,null=True)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 	def __str__(self):
-		return self.id
+		return self.ugc_title
+
+	class Meta:
+		unique_together = ('user', 'ugc_title')
 
 
 class UGCLike(models.Model):
@@ -135,6 +143,9 @@ class UGCLike(models.Model):
 	def __str__(self):
 		return self.user.username
 
+	class Meta:
+		unique_together = ('user', 'ugc')
+
 
 class UGCComment(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -146,7 +157,10 @@ class UGCComment(models.Model):
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 
 	def __str__(self):
-		return self.id
+		return self.user.username
+
+	class Meta:
+		unique_together = ('user', 'game','ugc')
 
 
 class UGCCommentLike(models.Model):
@@ -157,11 +171,18 @@ class UGCCommentLike(models.Model):
 	def __str__(self):
 		return self.user.username
 
+	class Meta:
+		unique_together = ('user', 'ugc_comment')
+
 
 class FollowUser(models.Model):
-	follower = models.OneToOneField(User, null=True, related_name='follower')
-	following = models.OneToOneField(User, null=True, related_name='following')
+	follower = models.ForeignKey(User, null=True, related_name='follower')
+	following = models.ForeignKey(User, null=True, related_name='following')
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 	def __str__(self):
 		return self.follower.username
+
+	class Meta:
+		unique_together = ('follower', 'following')
+
