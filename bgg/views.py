@@ -8,6 +8,7 @@ from .models import *
 from registration.models import Profile
 from rest_framework.decorators import api_view
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
 
 
 class GameCorrection(APIView):
@@ -301,19 +302,78 @@ class CreateGame(APIView):
 
 class GameExtension(APIView):
 	def post(self, request, format="json"):
-		game = request.data.pop('game')
-		game_data = Game.objects.get(id=game)
+		game_data = Game.objects.get(id=request.data.pop('game'))
 		game_extend_obj = GameExtend.objects.create(game=game_data,**request.data)
 		return Response(status=status.HTTP_200_OK)
 
 	def put(self, request, format="json"):
-		game = request.data.pop('game')
-		game_data = Game.objects.get(id=game)
+		game_data = Game.objects.get(id=request.data.pop('game'))
 		try:
 			game_extend_obj = GameExtend.objects.get(game=game_data)
 			game_extend_obj.__dict__.update(**request.data)
 			game_extend_obj.updated_at = datetime.datetime.now()
 			game_extend_obj.save()
+			return Response(status=status.HTTP_200_OK)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class TrendingGames(APIView):
+	def get(self,request,format="json"):
+		game = Game.objects.get(id=request.data.get('game', None))
+		game_like = request.data.get('game_like')
+		game_qs = Game.objects.all().order_by('-like_count')
+		response = []
+		for game_obj in game_qs:
+			response.append(game_obj)
+		print (response ,'=================================')
+		return Response(response)
+
+	def post(self,request,format="json"):
+		user = User.objects.get(id=request.data.get('user', None))
+		game = Game.objects.get(id=request.data.get('game', None))
+		game_like = request.data.get('game_like', None)
+
+		like_game_obj = LikeGame.objects.create(user=user,
+								game=game,game_like=game_like)
+		response = like(game_like,game)
+		return response
+
+	def put(self,request,format="json"):
+		user = User.objects.get(id=request.data.get('user', None))
+		game = Game.objects.get(id=request.data.get('game', None))
+		game_like = request.data.get('game_like', None)
+		try:
+			like_game_obj = LikeGame.objects.get(user=user,game=game)
+			if game_like == 'dislike':
+				like_game_obj.created_at=None
+				like_game_obj.save()
+				response = like(game_like,game)
+				return response
+
+			else:
+				like_game_obj.created_at=datetime.datetime.now()
+				like_game_obj.save()
+				response = like(game_like,game)
+				return response
+					
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+def like(game_like, game):
+	if game_like == 'like':
+		try:
+			game_obj = Game.objects.get(name=game.name)
+			game_obj.like_count += 1
+			game_obj.save()
+			return Response(status=status.HTTP_200_OK)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
+	else:
+		try:
+			game_obj = Game.objects.get(name=game.name)
+			game_obj.like_count -= 1
+			game_obj.save()
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)

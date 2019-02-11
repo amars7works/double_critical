@@ -27,7 +27,8 @@ class Game(models.Model):
 	category = models.CharField(max_length=60, null=True)
 	mechanism = models.CharField(max_length=60, null=True)
 	note_to_admin = models.TextField(null=True)
-	
+	views = models.IntegerField(blank=True,null=True)
+	like_count = models.IntegerField(blank=True,null=True)
 	status = models.CharField(
 				choices = STATUS_CHOICES,
 				default='review',
@@ -40,6 +41,7 @@ class Game(models.Model):
 				default='publisher',
 				max_length=10
 				)
+
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 
@@ -66,7 +68,7 @@ class GameExtend(models.Model):
 
 	def __str__(self):
 		return self.expansion
-
+	
 	class Meta:
 		unique_together = ('game',)
 
@@ -186,3 +188,23 @@ class FollowUser(models.Model):
 	class Meta:
 		unique_together = ('follower', 'following')
 
+class LikeGame(models.Model):
+	GAME_LIKE = (
+		('like','LIKE'),
+		('dislike','DISLIKE')
+		)
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	game = models.ForeignKey(Game, on_delete=models.CASCADE)
+	views = models.IntegerField(blank=True,null=True)
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+	game_like = models.CharField(
+				max_length=10,
+				choices=GAME_LIKE,
+				default=None
+				)
+
+	def __str__(self):
+		return self.user.username
+
+	class Meta:
+		unique_together = ('user', 'game')

@@ -15,4 +15,5 @@ urlpatterns = [
 	url(r'api/ugc/comment/like/$',views.UgcCommentLike.as_view(), name='ugc-commentlike'),
 	url(r'api/game/$',views.CreateGame.as_view(), name='create-game'),
 	url(r'api/game/extension/$',views.GameExtension.as_view(), name='game-extension'),
+	url(r'api/game/likes/$',views.TrendingGames.as_view(), name='game-likes'),
 ]

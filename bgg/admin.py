@@ -38,6 +38,8 @@ class UGCCommentLikeAdmin(admin.ModelAdmin):
 class FollowUserAdmin(admin.ModelAdmin):
 	list_display = ('follower','following','created_at',)
 
+class LikeGameAdmin(admin.ModelAdmin):
+	list_display = ('user','game','created_at',)
 
 
 admin.site.register(Game,GameAdmin)
@@ -50,3 +52,4 @@ admin.site.register(UGC, UGCAdmin)
 admin.site.register(FollowUser,FollowUserAdmin)
 admin.site.register(UGCLike,UGCLikeAdmin)
 admin.site.register(UGCCommentLike,UGCCommentLikeAdmin)
+admin.site.register(LikeGame,LikeGameAdmin)
