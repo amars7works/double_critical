@@ -377,3 +377,8 @@ def like(game_like, game):
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class UGCReportView(APIView):
+
+	def post(self,request,format="json"):
+		user = User.objects.get(id=request.data.get('user', None))

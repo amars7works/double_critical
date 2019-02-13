@@ -69,7 +69,7 @@ class ForgotPassword(APIView):
 			message = """
 				Hi %s,
 
-				%s is Ont Time Password to rest your Account
+				%s is One Time Password to rest your Account
 
 				Sincerely,
 				Double Critical
