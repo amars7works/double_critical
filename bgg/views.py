@@ -9,7 +9,7 @@ from registration.models import Profile
 from rest_framework.decorators import api_view
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-
+from django.contrib.auth.models import User
 
 class GameCorrection(APIView):
 
@@ -379,6 +379,17 @@ def like(game_like, game):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class UGCReportView(APIView):
-
+	
 	def post(self,request,format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		# user = User.objects.get(id=request.data.get('user', None))
+		user =  request.user
+		print(user)
+		try:
+			ugc_comment = UGCComment.objects.get(id=request.data.get('ugc_comment', None))
+			ugc_report = UGCReport.objects.get(user=user,ugc_comment=ugc_comment)
+			if ugc_report.user.is_authenticated():
+				ugc_report.created_at = datetime.datetime.now()
+				ugc_report.save()
+			return Response(status=status.HTTP_200_OK)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)

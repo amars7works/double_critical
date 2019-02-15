@@ -213,7 +213,7 @@ class LikeGame(models.Model):
 class UGCReport(models.Model):
 	user = models.ForeignKey(User, on_delete = models.CASCADE)
 	ugc_comment = models.ForeignKey(UGCComment, on_delete = models.CASCADE)
-	created_at = models.DateTimeField(null=True,blank=True)
+	created_at = models.DateTimeField(auto_now_add = True)
 	description = models.TextField(blank=True, null=True)
 
 	def __str__(self):
