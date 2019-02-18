@@ -15,6 +15,8 @@ urlpatterns = [
 	url(r'api/ugc/comment/like/$',views.UgcCommentLike.as_view(), name='ugc-commentlike'),
 	url(r'api/game/$',views.CreateGame.as_view(), name='create-game'),
 	url(r'api/game/extension/$',views.GameExtension.as_view(), name='game-extension'),
-	url(r'api/game/likes/$',views.TrendingGames.as_view(), name='game-likes'),
+	url(r'api/game/trending/$',views.TrendingGames.as_view(), name='trending-games'),
+	url(r'api/game/likes/$',views.LikeGames.as_view(), name='like-games'),
 	url(r'api/game/report/$',views.UGCReportView.as_view(),name='ugc-report'),
+	url(r'api/following/feed/$',views.FollowingFeed.as_view(), name='following-feed'),
 ]

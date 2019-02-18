@@ -1,5 +1,5 @@
 import datetime
-
+from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -319,15 +319,16 @@ class GameExtension(APIView):
 
 class TrendingGames(APIView):
 	def get(self,request,format="json"):
-		game = Game.objects.get(id=request.data.get('game', None))
-		game_like = request.data.get('game_like')
-		game_qs = Game.objects.all().order_by('-like_count')
-		response = []
-		for game_obj in game_qs:
-			response.append(game_obj)
-		print (response ,'=================================')
-		return Response(response)
+		game_qs = Game.objects.all().values().order_by('-like_count')
 
+		games = []
+		for game_obj in game_qs:
+			game_extend_obj = GameExtend.objects.get(game__name=game_obj['name'])
+			game_obj.update(game_extend_obj.__dict__)
+			games.append(game_obj)
+		return HttpResponse(games)
+
+class LikeGames(APIView):
 	def post(self,request,format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
 		game = Game.objects.get(id=request.data.get('game', None))
@@ -359,7 +360,6 @@ class TrendingGames(APIView):
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
-
 def like(game_like, game):
 	if game_like == 'like':
 		try:
@@ -379,17 +379,55 @@ def like(game_like, game):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class UGCReportView(APIView):
-	
 	def post(self,request,format="json"):
-		# user = User.objects.get(id=request.data.get('user', None))
 		user =  request.user
-		print(user)
+		print(user,'-----------------')
 		try:
 			ugc_comment = UGCComment.objects.get(id=request.data.get('ugc_comment', None))
 			ugc_report = UGCReport.objects.get(user=user,ugc_comment=ugc_comment)
+			print (ugc_report.user.is_authenticated, '===========')
 			if ugc_report.user.is_authenticated():
 				ugc_report.created_at = datetime.datetime.now()
 				ugc_report.save()
 			return Response(status=status.HTTP_200_OK)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class FollowingFeed(APIView):
+	def get(self,request,format="json"):
+		follower = User.objects.get(id=request.data.get('follower', None))
+		try:
+			response = []
+			user_follow_qs = FollowUser.objects.filter(
+								follower=follower)
+			following_users = []
+			for user_follow_obj in user_follow_qs:
+				following_users.append(user_follow_obj.following)
+
+			ugc_qs = UGC.objects.filter(user__in=following_users).\
+								values().order_by('-created_at')
+			for ugc_obj in ugc_qs:
+				response.append(ugc_obj)
+
+			game_collection_qs = GameCollection.objects.filter(
+								user__in=following_users).order_by('-created_at')
+			for game_collection in game_collection_qs:
+				game_obj = Game.objects.get(name=game_collection.game)
+				game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+				game_obj.__dict__.update(game_extend_obj.__dict__)
+				response.append(game_obj.__dict__)
+
+
+			follow_game = []
+			follow_game_qs = FollowGame.objects.filter(user=follower)
+			for follow_game_obj in follow_game_qs:
+				follow_game.append(follow_game_obj.game)
+			game_qs = Game.objects.filter(name__in=follow_game).values().order_by('-like_count')
+
+			for game_obj in game_qs:
+				game_extend_obj = GameExtend.objects.get(game__name=game_obj['name'])
+				game_obj.update(game_extend_obj.__dict__)
+				response.append(game_obj)
+			return HttpResponse(response)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
