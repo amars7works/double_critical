@@ -19,4 +19,6 @@ urlpatterns = [
 	url(r'api/game/likes/$',views.LikeGames.as_view(), name='like-games'),
 	url(r'api/game/report/$',views.UGCReportView.as_view(),name='ugc-report'),
 	url(r'api/following/feed/$',views.FollowingFeed.as_view(), name='following-feed'),
+	url(r'api/hotornot/$',views.HotorNot.as_view(), name='games-hotornot'),
+	url(r'api/product/page/link/$',views.DiscoveryModeHotorNot.as_view(), name='discoverymode-hotornot'),
 ]

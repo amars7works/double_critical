@@ -42,7 +42,7 @@ class LikeGameAdmin(admin.ModelAdmin):
 	list_display = ('user','game','created_at',)
 
 class UGCReportAdmin(admin.ModelAdmin):
-	list_display = ('user','ugc_comment','created_at','description')
+	list_display = ('user','ugc','created_at','description')
 
 
 admin.site.register(Game,GameAdmin)

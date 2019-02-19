@@ -197,14 +197,14 @@ class LikeGame(models.Model):
 				)
 
 	def __str__(self):
-		return self.user.username
+		return self.game.name
 
 	class Meta:
 		unique_together = ('user', 'game')
 
 class UGCReport(models.Model):
 	user = models.ForeignKey(User, on_delete = models.CASCADE)
-	ugc_comment = models.ForeignKey(UGCComment, on_delete = models.CASCADE)
+	ugc = models.ForeignKey(UGC, on_delete = models.CASCADE)
 	created_at = models.DateTimeField(auto_now_add = True)
 	description = models.TextField(blank=True, null=True)
 

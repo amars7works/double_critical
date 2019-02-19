@@ -123,6 +123,21 @@ class GameFollow(APIView):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class CollectingGame(APIView):
+	def get(self, request, format="json"):
+		user = User.objects.get(id=request.data.get('user', None))
+		game_coll_qs = GameCollection.objects.filter(user=user)
+		games_names = []
+		for game_coll in game_coll_qs:
+			games_names.append(game_coll.game)
+
+		response = []
+		game_qs = Game.objects.filter(name__in=games_names)
+		for game_obj in game_qs:
+			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+			game_obj.__dict__.update(game_extend_obj.__dict__)
+			response.append(game_obj.__dict__)
+		return HttpResponse(response)
+
 	def post(self, request, format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
 		game = Game.objects.get(id=request.data.get('game', None))
@@ -329,6 +344,20 @@ class TrendingGames(APIView):
 		return HttpResponse(games)
 
 class LikeGames(APIView):
+	def get(self,request,format="json"):
+		user = User.objects.get(id=request.data.get('user', None))
+		if user.is_authenticated():
+			qs = LikeGame.objects.filter(user=user,game_like='like').values()
+		response = []
+
+		for obj in qs:
+			game_obj = Game.objects.get(id=obj['game_id'])
+			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+			obj.update(game_extend_obj.__dict__)
+			obj.update(game_obj.__dict__)
+			response.append(obj)
+		return HttpResponse(response)
+
 	def post(self,request,format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
 		game = Game.objects.get(id=request.data.get('game', None))
@@ -346,13 +375,14 @@ class LikeGames(APIView):
 		try:
 			like_game_obj = LikeGame.objects.get(user=user,game=game)
 			if game_like == 'dislike':
-				like_game_obj.created_at=None
+				like_game_obj.game_like=game_like
 				like_game_obj.save()
 				response = like(game_like,game)
 				return response
 
 			else:
 				like_game_obj.created_at=datetime.datetime.now()
+				like_game_obj.game_like=game_like
 				like_game_obj.save()
 				response = like(game_like,game)
 				return response
@@ -380,12 +410,9 @@ def like(game_like, game):
 
 class UGCReportView(APIView):
 	def post(self,request,format="json"):
-		user =  request.user
-		print(user,'-----------------')
+		ugc = UGC.objects.get(id=request.data.get('ugc', None))
 		try:
-			ugc_comment = UGCComment.objects.get(id=request.data.get('ugc_comment', None))
 			ugc_report = UGCReport.objects.get(user=user,ugc_comment=ugc_comment)
-			print (ugc_report.user.is_authenticated, '===========')
 			if ugc_report.user.is_authenticated():
 				ugc_report.created_at = datetime.datetime.now()
 				ugc_report.save()
@@ -418,16 +445,41 @@ class FollowingFeed(APIView):
 				response.append(game_obj.__dict__)
 
 
-			follow_game = []
-			follow_game_qs = FollowGame.objects.filter(user=follower)
-			for follow_game_obj in follow_game_qs:
-				follow_game.append(follow_game_obj.game)
-			game_qs = Game.objects.filter(name__in=follow_game).values().order_by('-like_count')
+			# follow_game = []
+			# follow_game_qs = FollowGame.objects.filter(user=follower)
+			# for follow_game_obj in follow_game_qs:
+			# 	follow_game.append(follow_game_obj.game)
+			# game_qs = Game.objects.filter(name__in=follow_game).values().order_by('-like_count')
 
-			for game_obj in game_qs:
-				game_extend_obj = GameExtend.objects.get(game__name=game_obj['name'])
-				game_obj.update(game_extend_obj.__dict__)
-				response.append(game_obj)
+			# for game_obj in game_qs:
+			# 	game_extend_obj = GameExtend.objects.get(game__name=game_obj['name'])
+			# 	game_obj.update(game_extend_obj.__dict__)
+			# 	response.append(game_obj)
+
+			# If my following game got a new user generated content then it 
+			# must display in the feed. (UGC model should be related to Game model)
+			return HttpResponse(response)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class HotorNot(APIView):
+	def get(self,request,format="json"):
+		qs = Game.objects.filter(hotornot='True').values()
+		response = []
+		for game_obj in qs:
+			game_extend_obj = GameExtend.objects.get(game__name=game_obj['name'])
+			game_obj.update(game_extend_obj.__dict__)
+			response.append(game_obj)
+		return HttpResponse(response)
+
+class DiscoveryModeHotorNot(APIView):
+	def get(self,request,format="json"):
+		try:
+			response = []
+			game_obj = Game.objects.get(id=request.data.get('game', None))
+			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+			game_obj.__dict__.update(game_extend_obj.__dict__)
+			response.append(game_obj.__dict__)
 			return HttpResponse(response)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
