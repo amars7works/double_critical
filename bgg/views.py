@@ -340,24 +340,12 @@ class TrendingGames(APIView):
 		for game_obj in game_qs:
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj['name'])
 			game_obj.update(game_extend_obj.__dict__)
+			print (type(game_obj))
 			games.append(game_obj)
+		print (type(games))
 		return HttpResponse(games)
 
 class LikeGames(APIView):
-	def get(self,request,format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
-		if user.is_authenticated():
-			qs = LikeGame.objects.filter(user=user,game_like='like').values()
-		response = []
-
-		for obj in qs:
-			game_obj = Game.objects.get(id=obj['game_id'])
-			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
-			obj.update(game_extend_obj.__dict__)
-			obj.update(game_obj.__dict__)
-			response.append(obj)
-		return HttpResponse(response)
-
 	def post(self,request,format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
 		game = Game.objects.get(id=request.data.get('game', None))
@@ -410,15 +398,10 @@ def like(game_like, game):
 
 class UGCReportView(APIView):
 	def post(self,request,format="json"):
+		user = User.objects.get(id=request.data.get('user', None))
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
-		try:
-			ugc_report = UGCReport.objects.get(user=user,ugc_comment=ugc_comment)
-			if ugc_report.user.is_authenticated():
-				ugc_report.created_at = datetime.datetime.now()
-				ugc_report.save()
-			return Response(status=status.HTTP_200_OK)
-		except ObjectDoesNotExist:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
+		ugc_report = UGCReport.objects.create(user=user,ugc=ugc)
+		return Response(status=status.HTTP_200_OK)
 
 class FollowingFeed(APIView):
 	def get(self,request,format="json"):
@@ -462,24 +445,96 @@ class FollowingFeed(APIView):
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
-class HotorNot(APIView):
+class HotorNotSwipe(APIView):
 	def get(self,request,format="json"):
+		user = User.objects.get(id=request.data.get('user', None))
 		qs = Game.objects.filter(hotornot='True').values()
 		response = []
+		game_ids = []
 		for game_obj in qs:
+			game_ids.append(game_obj['id'])
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj['name'])
 			game_obj.update(game_extend_obj.__dict__)
 			response.append(game_obj)
+		likegames = LikeGame.objects.filter(user=user)
+		for likegame in likegames:
+			if likegame.game_id not in game_ids:
+				game_obj = Game.objects.get(id=likegame.game_id)
+				game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+				game_obj.__dict__.update(game_extend_obj.__dict__)
+				response.append(game_obj.__dict__)
 		return HttpResponse(response)
 
 class DiscoveryModeHotorNot(APIView):
 	def get(self,request,format="json"):
+		user = User.objects.get(id=request.data.get('user', None))
 		try:
 			response = []
 			game_obj = Game.objects.get(id=request.data.get('game', None))
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 			game_obj.__dict__.update(game_extend_obj.__dict__)
 			response.append(game_obj.__dict__)
+
 			return HttpResponse(response)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class DiscoveryModeSwipe(APIView):
+	def get(self,request,format="json"):
+		user = User.objects.get(id=request.data.get('user', None))
+		if user.is_authenticated():
+			qs = LikeGame.objects.filter(user=user,game_like='like').values()
+		response = []
+
+		game_ids = []
+		game_category = []
+		for obj in qs:
+			game_ids.append(obj['game_id'])
+
+		games = Game.objects.filter(id__in=game_ids)
+		for game_obj in games:
+			game_category.append(game_obj.category)
+			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+			game_obj.__dict__.update(game_extend_obj.__dict__)
+			response.append(game_obj.__dict__)
+
+		games = Game.objects.filter(category__in=game_category)
+		for game in games:
+			if game.id not in game_ids:
+				game_extend = GameExtend.objects.get(game__name=game.name)
+				game.__dict__.update(game_extend_obj.__dict__)
+				response.append(game.__dict__)
+
+		game_collection = GameCollection.objects.filter(user=user)
+		for game_coll in game_collection:
+			game = Game.objects.get(name=game_coll.game)
+			if game.id not in game_ids:
+				game_extend = GameExtend.objects.get(game__name=game.name)
+				game.__dict__.update(game_extend_obj.__dict__)
+				response.append(game.__dict__)
+
+		return HttpResponse(response)
+
+class UserCommonGame(APIView):
+	def get(self,request,format="json"):
+		follower = User.objects.get(id=request.data.get('user', None))
+		following = User.objects.get(id=request.data.get('other_user', None))
+		follower_games = FollowGame.objects.filter(user=follower)
+		following_games = FollowGame.objects.filter(user=following)
+	
+		followergames = []
+		followinggames = []
+		for follower_game in follower_games:
+			game = Game.objects.get(name=follower_game.game)
+			game_extend = GameExtend.objects.get(game__name=game.name)
+			game.__dict__.update(game_extend.__dict__)
+			followergames.append(game.__dict__)
+
+		for following_game in following_games:
+			game_obj = Game.objects.get(name=following_game.game)
+			game_extend_obj = GameExtend.objects.get(game__name=game.name)
+			game_obj.__dict__.update(game_extend_obj.__dict__)
+			followinggames.append(game_obj.__dict__)
+
+		response = followergames and followinggames
+		return HttpResponse(response)
