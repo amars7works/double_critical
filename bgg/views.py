@@ -1,5 +1,5 @@
 import datetime
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -334,16 +334,16 @@ class GameExtension(APIView):
 
 class TrendingGames(APIView):
 	def get(self,request,format="json"):
-		game_qs = Game.objects.all().values().order_by('-like_count')
+		game_qs = Game.objects.all().order_by('-like_count')
 
-		games = []
+		games = {}
 		for game_obj in game_qs:
-			game_extend_obj = GameExtend.objects.get(game__name=game_obj['name'])
-			game_obj.update(game_extend_obj.__dict__)
-			print (type(game_obj))
-			games.append(game_obj)
-		print (type(games))
-		return HttpResponse(games)
+			games[game_obj.name]={}
+			# game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+			# game_obj.__dict__.update(game_extend_obj.__dict__)
+			games[game_obj.name].update(like_count = game_obj.like_count)
+			games[game_obj.name].update(dislike_count = None)
+		return JsonResponse(games)
 
 class LikeGames(APIView):
 	def post(self,request,format="json"):
