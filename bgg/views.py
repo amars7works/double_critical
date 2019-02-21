@@ -403,67 +403,93 @@ class UGCReportView(APIView):
 		ugc_report = UGCReport.objects.create(user=user,ugc=ugc)
 		return Response(status=status.HTTP_200_OK)
 
-class FollowingFeed(APIView):
+class GameFollowingFeed(APIView):
 	def get(self,request,format="json"):
-		follower = User.objects.get(id=request.data.get('follower', None))
-		try:
-			response = []
-			user_follow_qs = FollowUser.objects.filter(
-								follower=follower)
-			following_users = []
-			for user_follow_obj in user_follow_qs:
-				following_users.append(user_follow_obj.following)
+		follower = User.objects.get(id=request.GET.get('follower', None))
 
-			ugc_qs = UGC.objects.filter(user__in=following_users).\
-								values().order_by('-created_at')
-			for ugc_obj in ugc_qs:
-				response.append(ugc_obj)
+		response = {}
+		follow_game = []
+		following_users = []
 
-			game_collection_qs = GameCollection.objects.filter(
-								user__in=following_users).order_by('-created_at')
-			for game_collection in game_collection_qs:
-				game_obj = Game.objects.get(name=game_collection.game)
-				game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
-				game_obj.__dict__.update(game_extend_obj.__dict__)
-				response.append(game_obj.__dict__)
+		follow_game_qs = FollowGame.objects.filter(user=follower)
+		for follow_game_obj in follow_game_qs:
+			follow_game.append(follow_game_obj.game.id)
+		game_qs = Game.objects.filter(id__in=follow_game).order_by('-like_count')
+
+		for game_obj in game_qs:
+			response[game_obj.name]={}
+			# game_extend_obj = GameExtend.objects.get(game__name=game_obj['name'])
+			# game_obj.update(game_extend_obj.__dict__)
+			# response.append(game_obj)
+			response[game_obj.name].update(like_count = game_obj.like_count)
+			response[game_obj.name].update(dislike_count = None)
 
 
-			# follow_game = []
-			# follow_game_qs = FollowGame.objects.filter(user=follower)
-			# for follow_game_obj in follow_game_qs:
-			# 	follow_game.append(follow_game_obj.game)
-			# game_qs = Game.objects.filter(name__in=follow_game).values().order_by('-like_count')
+		user_follow_qs = FollowUser.objects.filter(
+							follower=follower)
+		for user_follow_obj in user_follow_qs:
+			following_users.append(user_follow_obj.following)
+		game_collection_qs = GameCollection.objects.filter(
+							user__in=following_users).order_by('-created_at')
 
-			# for game_obj in game_qs:
-			# 	game_extend_obj = GameExtend.objects.get(game__name=game_obj['name'])
-			# 	game_obj.update(game_extend_obj.__dict__)
-			# 	response.append(game_obj)
+		for game_collection in game_collection_qs:
+			if game_collection.game.id not in follow_game:
+				game_object = Game.objects.get(name=game_collection.game)
+				response[game_object.name] = {}
+				# game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+				# game_obj.__dict__.update(game_extend_obj.__dict__)
+				# response.append(game_obj.__dict__)
+				response[game_object.name].update(like_count = game_object.like_count)
+				response[game_object.name].update(dislike_count = None)
+		
+		return JsonResponse(response)
 
-			# If my following game got a new user generated content then it 
-			# must display in the feed. (UGC model should be related to Game model)
-			return HttpResponse(response)
-		except ObjectDoesNotExist:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class UserFollowingFeed(APIView):
+	def get(self,request,format="json"):
+		follower = User.objects.get(id=request.GET.get('follower', None))
+		response = {}
+		user_follow_qs = FollowUser.objects.filter(
+							follower=follower)
+		following_users = []
+		for user_follow_obj in user_follow_qs:
+			following_users.append(user_follow_obj.following)
+
+		ugc_qs = UGC.objects.filter(user__in=following_users).\
+							order_by('-created_at')
+		for ugc_obj in ugc_qs:
+			response[ugc_obj.user.username]={}
+			response[ugc_obj.user.username].update(ugc_title = ugc_obj.ugc_title)
+			
+		return JsonResponse(response)
 
 class HotorNotSwipe(APIView):
 	def get(self,request,format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
-		qs = Game.objects.filter(hotornot='True').values()
-		response = []
+		user = User.objects.get(id=request.GET.get('user', None))
+		qs = Game.objects.filter(hotornot='True')
+		response = {}
 		game_ids = []
 		for game_obj in qs:
-			game_ids.append(game_obj['id'])
-			game_extend_obj = GameExtend.objects.get(game__name=game_obj['name'])
-			game_obj.update(game_extend_obj.__dict__)
-			response.append(game_obj)
+			response[game_obj.name]={}
+			game_ids.append(game_obj.id)
+			# game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+			# game_obj.__dict__.update(game_extend_obj.__dict__)
+			# response.append(game_obj.__dict__)
+			response[game_obj.name].update(like_count = game_obj.like_count)
+			response[game_obj.name].update(dislike_count = None)
+
 		likegames = LikeGame.objects.filter(user=user)
 		for likegame in likegames:
 			if likegame.game_id not in game_ids:
-				game_obj = Game.objects.get(id=likegame.game_id)
-				game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
-				game_obj.__dict__.update(game_extend_obj.__dict__)
-				response.append(game_obj.__dict__)
-		return HttpResponse(response)
+				game = Game.objects.get(id=likegame.game_id)
+				response[game.name]={}
+				# game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+				# game_obj.__dict__.update(game_extend_obj.__dict__)
+				# response.append(game_obj.__dict__)
+				response[game.name].update(like_count = game.like_count)
+				response[game.name].update(dislike_count = None)
+
+		return JsonResponse(response)
 
 class DiscoveryModeHotorNot(APIView):
 	def get(self,request,format="json"):
@@ -481,10 +507,10 @@ class DiscoveryModeHotorNot(APIView):
 
 class DiscoveryModeSwipe(APIView):
 	def get(self,request,format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=request.GET.get('user', None))
 		if user.is_authenticated():
 			qs = LikeGame.objects.filter(user=user,game_like='like').values()
-		response = []
+		response = {}
 
 		game_ids = []
 		game_category = []
@@ -493,27 +519,38 @@ class DiscoveryModeSwipe(APIView):
 
 		games = Game.objects.filter(id__in=game_ids)
 		for game_obj in games:
+			response[game_obj.name]={}
 			game_category.append(game_obj.category)
-			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
-			game_obj.__dict__.update(game_extend_obj.__dict__)
-			response.append(game_obj.__dict__)
+			# game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+			# game_obj.__dict__.update(game_extend_obj.__dict__)
+			# response.append(game_obj.__dict__)
+			response[game_obj.name].update(like_count = game_obj.like_count)
+			response[game_obj.name].update(dislike_count = None)
 
-		games = Game.objects.filter(category__in=game_category)
-		for game in games:
+
+		game_objs = Game.objects.filter(category__in=game_category)
+		for game in game_objs:
 			if game.id not in game_ids:
-				game_extend = GameExtend.objects.get(game__name=game.name)
-				game.__dict__.update(game_extend_obj.__dict__)
-				response.append(game.__dict__)
+				response[game.name] = {}
+				# game_extend = GameExtend.objects.get(game__name=game.name)
+				# game.__dict__.update(game_extend_obj.__dict__)
+				# response.append(game.__dict__)
+				response[game.name].update(like_count = game.like_count)
+				response[game.name].update(dislike_count = None)
+
 
 		game_collection = GameCollection.objects.filter(user=user)
 		for game_coll in game_collection:
-			game = Game.objects.get(name=game_coll.game)
+			gameobj = Game.objects.get(name=game_coll.game)
 			if game.id not in game_ids:
-				game_extend = GameExtend.objects.get(game__name=game.name)
-				game.__dict__.update(game_extend_obj.__dict__)
-				response.append(game.__dict__)
+				response[gameobj.name] = {}
+				# game_extend = GameExtend.objects.get(game__name=game.name)
+				# game.__dict__.update(game_extend_obj.__dict__)
+				# response.append(game.__dict__)
+				response[gameobj.name].update(like_count = gameobj.like_count)
+				response[gameobj.name].update(dislike_count = None)
 
-		return HttpResponse(response)
+		return JsonResponse(response)
 
 class UserCommonGame(APIView):
 	def get(self,request,format="json"):
