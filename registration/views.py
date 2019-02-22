@@ -21,8 +21,7 @@ class Login(APIView):
 		user = authenticate(request, username=username, password=password)
 		if user:
 			login(request,user)
-			return Response({"user_status":user.is_authenticated(),
-			"terms_conditions":user.profile.terms_conditions}, status=status.HTTP_200_OK)
+			return Response({"user_status":user.is_authenticated()}, status=status.HTTP_200_OK)
 		else:
 			return Response(status=status.HTTP_401_UNAUTHORIZED)
 

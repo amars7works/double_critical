@@ -1,5 +1,5 @@
 import datetime
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -8,7 +8,6 @@ from .models import *
 from registration.models import Profile
 from rest_framework.decorators import api_view
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse
 from django.contrib.auth.models import User
 
 class GameCorrection(APIView):
@@ -130,13 +129,15 @@ class CollectingGame(APIView):
 		for game_coll in game_coll_qs:
 			games_names.append(game_coll.game)
 
-		response = []
+		response = {}
 		game_qs = Game.objects.filter(name__in=games_names)
 		for game_obj in game_qs:
-			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
-			game_obj.__dict__.update(game_extend_obj.__dict__)
-			response.append(game_obj.__dict__)
-		return HttpResponse(response)
+			# game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+			# game_obj.__dict__.update(game_extend_obj.__dict__)
+			# response.append(game_obj.__dict__)
+			response[game_obj.name].update(like_count = game_obj.like_count)
+			response[game_obj.name].update(dislike_count = None)
+		return JsonResponse(response)
 
 	def post(self, request, format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
@@ -493,17 +494,16 @@ class HotorNotSwipe(APIView):
 
 class DiscoveryModeHotorNot(APIView):
 	def get(self,request,format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
-		try:
-			response = []
-			game_obj = Game.objects.get(id=request.data.get('game', None))
-			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
-			game_obj.__dict__.update(game_extend_obj.__dict__)
-			response.append(game_obj.__dict__)
+		response = {}
+		game_obj = Game.objects.get(id=request.data.get('game', None))
+		response[game_obj.name] = {}
+		# game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+		# game_obj.__dict__.update(game_extend_obj.__dict__)
+		# response.append(game_obj.__dict__)
+		response[game_obj.name].update(like_count = game_obj.like_count)
+		response[game_obj.name].update(dislike_count = None)
 
-			return HttpResponse(response)
-		except ObjectDoesNotExist:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
+		return JsonResponse(response)
 
 class DiscoveryModeSwipe(APIView):
 	def get(self,request,format="json"):
@@ -559,19 +559,26 @@ class UserCommonGame(APIView):
 		follower_games = FollowGame.objects.filter(user=follower)
 		following_games = FollowGame.objects.filter(user=following)
 	
-		followergames = []
-		followinggames = []
+		followergames = {}
+		followinggames = {}
 		for follower_game in follower_games:
 			game = Game.objects.get(name=follower_game.game)
-			game_extend = GameExtend.objects.get(game__name=game.name)
-			game.__dict__.update(game_extend.__dict__)
-			followergames.append(game.__dict__)
+			followergames[game.name] = {}
+			# game_extend = GameExtend.objects.get(game__name=game.name)
+			# game.__dict__.update(game_extend.__dict__)
+			# followergames.append(game.__dict__)
+			followergames[game.name].update(like_count = game.like_count)
+			followergames[game.name].update(dislike_count = None)
+
 
 		for following_game in following_games:
 			game_obj = Game.objects.get(name=following_game.game)
-			game_extend_obj = GameExtend.objects.get(game__name=game.name)
-			game_obj.__dict__.update(game_extend_obj.__dict__)
-			followinggames.append(game_obj.__dict__)
+			followinggames[game_obj.name] = {}
+			# game_extend_obj = GameExtend.objects.get(game__name=game.name)
+			# game_obj.__dict__.update(game_extend_obj.__dict__)
+			# followinggames.append(game_obj.__dict__)
+			followinggames[game_obj.name].update(like_count = game_obj.like_count)
+			followinggames[game_obj.name].update(dislike_count = None)
 
 		response = followergames and followinggames
-		return HttpResponse(response)
+		return JsonResponse(response)

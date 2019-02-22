@@ -3,7 +3,7 @@ from .base import *
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.10.148']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.10.113']
 
 
 # Quick-start development settings - unsuitable for production
