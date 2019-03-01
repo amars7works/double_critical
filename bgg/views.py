@@ -16,18 +16,11 @@ class GameCorrection(APIView):
 		response = Game.objects.create(**request.data)
 		return Response(status=status.HTTP_201_CREATED)
 
-@api_view(['GET'])
-def user_auth_status(request, format="json"):
-	username = request.data.get('username', None)
-	profile_obj = Profile.objects.get(user__username=username)
-	data =[]
-	user = profile_obj.user
-	if user.is_authenticated():
-		return Response(user.is_authenticated,status=status.HTTP_200_OK)
-	else:
-		return Response(user.is_authenticated,status=status.HTTP_401_UNAUTHORIZED)
-
 class UserFollow(APIView):
+	def get(self,request,format="json"):
+		follower_user = User.objects.get(id=request.data.get('follower', None))
+		qs = FollowUser.objects.filter(follower=follower_user)
+
 	def post(self, request, format="json"):
 		follower_user = User.objects.get(id=request.data.get('follower', None))
 		following_user = User.objects.get(id=request.data.get('following', None))

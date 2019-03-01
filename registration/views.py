@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404
 
+from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,6 +14,7 @@ from rest_framework import status
 from .models import Profile
 from .custom_signals import post_registration_notify
 from .serializers import UserProfileSerializer
+
 
 class Login(APIView):
 	def post(self, request, format="json"):
@@ -102,3 +104,43 @@ class ResetPassword(APIView):
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def user_authentication_status(request):
+	return Response(request.user.is_authenticated(), status=status.HTTP_200_OK)
+
+class Sociallogin(APIView):
+	def post(self,request,format="json"):
+		# provider = request.data.get('provider', None)
+		# name = request.data.get('name', None)
+		# client_id = request.data.get('client_id', None)
+		# refresh_token = request.data.get('refresh_token', None)
+		# access_token = request.data.get('access_token', None)
+		# social_obj = SocialLogin.objects.create(provider=provider,name=name,client_id=client_id,
+		# 	refresh_token=refresh_token, access_token=access_token)
+		# return Response(status=status.HTTP_200_OK)
+
+		URL = request.data.get('url', None)
+		import urllib.request, json
+		with urllib.request.urlopen(URL) as url:
+			data = url.read().decode()
+			print('===========',type(data), '---------', data)
+
+	def put(self,request,format="json"):
+		provider = request.data.get('provider', None)
+		name = request.data.get('name', None)
+		client_id = request.data.get('client_id', None)
+		refresh_token = request.data.get('refresh_token', None)
+		access_token = request.data.get('access_token', None)
+		try:
+			social_obj = SocialLogin.objects.get(provider=provider,name=name)
+			social_obj.__dict__.update(name=name)
+			social_obj.__dict__.update(refresh_token=refresh_token)
+			social_obj.__dict__.update(access_token=access_token)
+			social_obj.save()
+			return Response(status=status.HTTP_200_OK)
+		except ObjectDoesNotExist:
+			social_obj = SocialLogin.objects.create(provider=provider,name=name,client_id=client_id,
+					refresh_token=refresh_token, access_token=access_token)
+			return Response('user details created',status=status.HTTP_200_OK)
