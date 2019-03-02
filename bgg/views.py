@@ -294,8 +294,43 @@ class UgcCommentLike(APIView):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class CreateGame(APIView):
+	def get(self, request, format="json"):
+		game_obj = Game.objects.get(id=request.data.get('game', None))
+		try:
+			response = {}
+			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+			game_obj.__dict__.update(game_extend_obj.__dict__)
+			game_obj.save()
+			response.update(game_obj.__dict__)
+
+			print (response, '111111111111111111111111')
+			return JsonResponse(response)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
+
 	def post(self, request, format="json"):
+		# game_obj = Game.objects.create(name=name,year_published=year_published,
+		# 			minimum_players=minimum_players,maximum_players=maximum_players,
+		# 			mfg_suggested_ages=mfg_suggested_ages,
+		# 			minimum_playing_time=minimum_playing_time,
+		# 			maximum_playing_time=maximum_playing_time,designer=designer,
+		# 			artist=artist,publisher=publisher,category=category,
+		# 			mechanism=mechanism,views=views,like_count=like_count,
+		# 			status=status,hotornot=hotornot,upc=upc,origin=origin)
+
+		# fields = [f for f in request.data]
+		# for f in fields:
+		# 	# setattr(request,f, request.get(f,
+		# 	getattr(request,f)
+		# 	# ))
+		# print (request, '=============================')
+		# request.save()
+
+
 		game_obj = Game.objects.create(**request.data)
+		print (request.data,'IN THE CREATE GAME FUNCTION')
+		# game_data = Game.objects.get(game=game_obj.name)
+		# game_extend_obj = GameExtend.objects.create(game=game_data,**request.data)
 		return Response(status=status.HTTP_200_OK)
 
 	def put(self, request, format="json"):
