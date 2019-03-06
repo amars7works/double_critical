@@ -1,3 +1,4 @@
+import urllib.request, json
 from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
@@ -11,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from .models import Profile
+from .models import Profile, SocialLogin
 from .custom_signals import post_registration_notify
 from .serializers import UserProfileSerializer
 
@@ -112,20 +113,21 @@ def user_authentication_status(request):
 
 class Sociallogin(APIView):
 	def post(self,request,format="json"):
-		# provider = request.data.get('provider', None)
-		# name = request.data.get('name', None)
-		# client_id = request.data.get('client_id', None)
-		# refresh_token = request.data.get('refresh_token', None)
-		# access_token = request.data.get('access_token', None)
-		# social_obj = SocialLogin.objects.create(provider=provider,name=name,client_id=client_id,
-		# 	refresh_token=refresh_token, access_token=access_token)
-		# return Response(status=status.HTTP_200_OK)
+		first_name = request.data.get('given', None)
+		last_name = request.data.get('family_name', None)
+		profile_obj = Profile.objects.get(user__email=request.data.get('email', None))
+		print (profile_obj.user.first_name)
+		if profile_obj.email:
+			profile_obj.user.first_name
+		else:
+			social_login_obj = SocialLogin.objects.create(**request.data)
 
-		URL = request.data.get('url', None)
-		import urllib.request, json
-		with urllib.request.urlopen(URL) as url:
-			data = url.read().decode()
-			print('===========',type(data), '---------', data)
+		return Response(status=status.HTTP_200_OK)
+		# URL = request.data.get('url', None)
+
+		# with urllib.request.urlopen(URL) as url:
+		# 	data = url.read().decode()
+		# 	print('===========',type(data), '---------', data)
 
 	def put(self,request,format="json"):
 		provider = request.data.get('provider', None)

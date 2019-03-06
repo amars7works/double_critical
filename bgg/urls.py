@@ -23,4 +23,5 @@ urlpatterns = [
 	url(r'api/product/page/link/$',views.DiscoveryModeHotorNot.as_view(), name='discoverymode-hotornot'),
 	url(r'api/discoverymode/swipe/$',views.DiscoveryModeSwipe.as_view(), name='discoverymode-swipe'),
 	url(r'api/game/common/$',views.UserCommonGame.as_view(), name='common-games'),
+	url(r'api/search/$',views.Search.as_view(), name='search'),
 ]

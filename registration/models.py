@@ -43,22 +43,29 @@ class Profile(models.Model):
 		return self.user.username
 
 class SocialLogin(models.Model):
-	PROVIDER = (
-		('facebook','FACEBOOK'),
-		('google','GOOGLE')
-		)
-	provider = models.CharField(
-				max_length=10,
-				choices=PROVIDER,
-				default=None
-				)
-	first_name = models.CharField(max_length=20)
-	last_name = models.CharField(max_length=20)
-	email = models.CharField(max_length=20)
-	birthdate = models.DateTimeField()
+	# PROVIDER = (
+	# 	('facebook','FACEBOOK'),
+	# 	('google','GOOGLE')
+	# 	)
+	# provider = models.CharField(
+	# 			max_length=10,
+	# 			choices=PROVIDER,
+	# 			default=None
+	# 			)
+	user = models.OneToOneField(User, on_delete=models.CASCADE,null=True)
+	name = models.CharField(max_length=35,blank=True,null=True)
+	family_name = models.CharField(max_length=35,blank=True,null=True)
+	given_name = models.CharField(max_length=35,blank=True,null=True)
+	birthdate = models.DateTimeField(blank=True,null=True)
 	client_id = models.CharField(max_length=250,null=True)
-	refresh_token = models.CharField(max_length=250)
-	access_token = models.TextField()
+	refresh_token = models.TextField(blank=True,null=True)
+	google_access_token = models.TextField(blank=True,null=True)
+	facebook_access_token = models.TextField(blank=True,null=True)
+	id_token = models.TextField(blank=True,null=True)
+	access_token_expiration_date = models.DateTimeField()
 
 	def __str__(self):
-		return self.name
+		return str(self.name)
+
+	# class Meta:
+	# 	unique_together = ('provider', 'name')

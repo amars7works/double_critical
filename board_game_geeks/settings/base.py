@@ -31,7 +31,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'social_django',
+    # 'social_django',
 
     'rest_framework',
     
@@ -65,8 +65,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'social_django.context_processors.backends',
-                'social_django.context_processors.login_redirect',
+                # 'social_django.context_processors.backends',
+                # 'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -100,10 +100,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.open_id.OpenIdAuth',  # for Google authentication
-    'social_core.backends.google.GoogleOpenId',  # for Google authentication
-    'social_core.backends.google.GoogleOAuth2',  # for Google authentication
-    'social_core.backends.google.GoogleOAuth',  # for Google authentication
+    # 'social_core.backends.open_id.OpenIdAuth',  # for Google authentication
+    # 'social_core.backends.google.GoogleOpenId',  # for Google authentication
+    # 'social_core.backends.google.GoogleOAuth2',  # for Google authentication
+    # 'social_core.backends.google.GoogleOAuth',  # for Google authentication
     # 'social_core.backends.github.GithubOAuth2',  # for Github authentication
     # 'social_core.backends.facebook.FacebookOAuth2',  # for Facebook authentication
     # 'social_core.backends.twitter.TwitterOAuth',  # for twitter authentication

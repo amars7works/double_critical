@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class GameCategory(models.Model):
+	category_name = models.CharField(max_length=60, null=True)
+
+	def __str__(self):
+		return self.category_name
 
 class Game(models.Model):
 
@@ -24,7 +29,7 @@ class Game(models.Model):
 	designer = models.CharField(max_length=40, null=True)
 	artist = models.CharField(max_length=40, null=True)
 	publisher = models.TextField(max_length=60, null=True)
-	category = models.CharField(max_length=60, null=True)
+	category = models.ForeignKey(GameCategory, on_delete=models.CASCADE,null=True)
 	mechanism = models.CharField(max_length=60, null=True)
 	views = models.IntegerField(blank=True,null=True)
 	like_count = models.IntegerField(blank=True,null=True)
@@ -210,3 +215,17 @@ class UGCReport(models.Model):
 
 	def __str__(self):
 		return self.user.username
+
+class Tags(models.Model):
+	tag = models.CharField(max_length=30)
+
+	def __str__(self):
+		return self.tag
+
+class GameTag(models.Model):
+	game_name = models.ForeignKey(Game, on_delete=models.CASCADE, 
+							related_name='game_name')
+	tag_name = models.ForeignKey(Tags, on_delete=models.CASCADE)
+
+	def __str__(self):
+		return self.game_name.name

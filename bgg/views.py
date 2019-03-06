@@ -1,5 +1,8 @@
 import datetime
-from django.http import JsonResponse
+import json
+from django.core import serializers
+from django.forms.models import model_to_dict
+from django.http import JsonResponse, HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -295,15 +298,16 @@ class UgcCommentLike(APIView):
 
 class CreateGame(APIView):
 	def get(self, request, format="json"):
-		game_obj = Game.objects.get(id=request.data.get('game', None))
+		game_obj = Game.objects.get(id=request.GET.get('game', None))
+		game_obj_dict = model_to_dict(game_obj)
 		try:
 			response = {}
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
-			game_obj.__dict__.update(game_extend_obj.__dict__)
-			game_obj.save()
-			response.update(game_obj.__dict__)
+			game_extend_obj_dict = model_to_dict(game_extend_obj)
 
-			print (response, '111111111111111111111111')
+			response.update(game_obj_dict)
+			response.update(game_extend_obj_dict)
+
 			return JsonResponse(response)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -328,7 +332,6 @@ class CreateGame(APIView):
 
 
 		game_obj = Game.objects.create(**request.data)
-		print (request.data,'IN THE CREATE GAME FUNCTION')
 		# game_data = Game.objects.get(game=game_obj.name)
 		# game_extend_obj = GameExtend.objects.create(game=game_data,**request.data)
 		return Response(status=status.HTTP_200_OK)
@@ -473,7 +476,6 @@ class GameFollowingFeed(APIView):
 		
 		return JsonResponse(response)
 
-
 class UserFollowingFeed(APIView):
 	def get(self,request,format="json"):
 		follower = User.objects.get(id=request.GET.get('follower', None))
@@ -610,3 +612,28 @@ class UserCommonGame(APIView):
 
 		response = followergames and followinggames
 		return JsonResponse(response)
+
+class Search(APIView):
+	def get(self, request, format="json"):
+		data = request.data.get('data', None)
+		game_name_qs = Game.objects.filter(name=data).order_by('name')
+		print (game_name_qs, '-----------------------')
+		game_category_qs = Game.objects.filter(category__category_name=data).order_by('name')
+		print (game_category_qs, '//////////////////////////')
+		game_tag_qs = GameTag.objects.filter(tag_name__tag=data).order_by('tag_name')
+		print (game_tag_qs, '=============================')
+
+
+		qs = game_name_qs.union(game_category_qs)
+
+		game_ids = []
+		for obj in game_name_qs:
+			game_ids.append(obj.id)
+
+		objs = {}
+
+		for obj in game_name_qs:
+			objs.update(obj)
+
+
+		return Response(status=status.HTTP_200_OK)

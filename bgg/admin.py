@@ -45,6 +45,12 @@ class UGCReportAdmin(admin.ModelAdmin):
 	list_display = ('user','ugc','created_at','description')
 
 
+class UGCReportAdmin(admin.ModelAdmin):
+	list_display = ('user','ugc','created_at','description')
+
+class GameTagAdmin(admin.ModelAdmin):
+	list_display = ('game_name','tag_name')
+
 admin.site.register(Game,GameAdmin)
 admin.site.register(GameExtend,GameExtendAdmin)
 admin.site.register(FollowGame,FollowGameAdmin)
@@ -57,3 +63,6 @@ admin.site.register(UGCLike,UGCLikeAdmin)
 admin.site.register(UGCCommentLike,UGCCommentLikeAdmin)
 admin.site.register(LikeGame,LikeGameAdmin)
 admin.site.register(UGCReport,UGCReportAdmin)
+admin.site.register(Tags)
+admin.site.register(GameCategory)
+admin.site.register(GameTag,GameTagAdmin)
