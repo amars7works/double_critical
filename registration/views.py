@@ -6,6 +6,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404
 
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
+
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -113,16 +116,26 @@ def user_authentication_status(request):
 
 class Sociallogin(APIView):
 	def post(self,request,format="json"):
-		first_name = request.data.get('given', None)
-		last_name = request.data.get('family_name', None)
-		profile_obj = Profile.objects.get(user__email=request.data.get('email', None))
-		print (profile_obj.user.first_name)
-		if profile_obj.email:
-			profile_obj.user.first_name
-		else:
-			social_login_obj = SocialLogin.objects.create(**request.data)
+		email = request.data.get('email', None)
+		access_token = request.data.get('accessToken', None)
+		first_name = request.data.get('givenName', None)
+		last_name = request.data.get('familyName', None)
+		try:
+			profile_obj = Profile.objects.get(user__email=email)
+			if profile_obj:
+				profile_obj.user.first_name=first_name
+				profile_obj.user.last_name=last_name
+				profile_obj.token=access_token
+				profile_obj.save()
+			# return Response(status=status.HTTP_200_OK)
+		except ObjectDoesNotExist:
+			# we have to create user and profile here
+			print ('----------------------------------------------------')
+			return HttpResponseRedirect("../../")
+			# User.objects.create(first_name=first_name, last_name=last_name, 
+			# 						email=email, token=access_token)
+			# social_login_obj = SocialLogin.objects.create(**request.data)
 
-		return Response(status=status.HTTP_200_OK)
 		# URL = request.data.get('url', None)
 
 		# with urllib.request.urlopen(URL) as url:

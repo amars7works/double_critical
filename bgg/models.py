@@ -123,6 +123,7 @@ class GameCollection(models.Model):
 
 class UGC(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	game = models.ForeignKey(Game, on_delete=models.CASCADE)
 	ugc_title = models.CharField(max_length=30)
 	like_count = models.IntegerField(blank=True,null=True)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)

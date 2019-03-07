@@ -163,6 +163,20 @@ class CollectingGame(APIView):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class Ugc(APIView):
+	def get(self, request, format="json"):
+		game_obj = Game.objects.get(id=request.GET.get('game', None))
+		try:
+			response = {}
+			ugc_obj = UGC.objects.get(game__name=game_obj.name)
+			ugc_comment = UGCComment.objects.filter(ugc__ugc_title=ugc_obj.ugc_title)
+			response[ugc_obj.ugc_title] = {}
+			response[ugc_obj.ugc_title].update(user=ugc_obj.user.username)
+			response[ugc_obj.ugc_title].update(comments_count=ugc_comment.count())
+
+			return JsonResponse(response)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
+
 	def post(self, request, format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
 		ugc_title = request.data.get('ugc_title', None)

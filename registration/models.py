@@ -43,20 +43,11 @@ class Profile(models.Model):
 		return self.user.username
 
 class SocialLogin(models.Model):
-	# PROVIDER = (
-	# 	('facebook','FACEBOOK'),
-	# 	('google','GOOGLE')
-	# 	)
-	# provider = models.CharField(
-	# 			max_length=10,
-	# 			choices=PROVIDER,
-	# 			default=None
-	# 			)
-	user = models.OneToOneField(User, on_delete=models.CASCADE,null=True)
-	name = models.CharField(max_length=35,blank=True,null=True)
-	family_name = models.CharField(max_length=35,blank=True,null=True)
-	given_name = models.CharField(max_length=35,blank=True,null=True)
-	birthdate = models.DateTimeField(blank=True,null=True)
+	user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+	# name = models.CharField(max_length=35,blank=True,null=True)
+	# family_name = models.CharField(max_length=35,blank=True,null=True)
+	# given_name = models.CharField(max_length=35,blank=True,null=True)
+	# birthdate = models.DateTimeField(blank=True,null=True)
 	client_id = models.CharField(max_length=250,null=True)
 	refresh_token = models.TextField(blank=True,null=True)
 	google_access_token = models.TextField(blank=True,null=True)
@@ -66,6 +57,3 @@ class SocialLogin(models.Model):
 
 	def __str__(self):
 		return str(self.name)
-
-	# class Meta:
-	# 	unique_together = ('provider', 'name')
