@@ -160,7 +160,7 @@ class UGCComment(models.Model):
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 
 	def __str__(self):
-		return self.user.username
+		return self.ugc_comment
 
 	class Meta:
 		unique_together = ('user', 'game','ugc')
@@ -169,6 +169,9 @@ class UGCCommentLike(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	ugc_comment = models.ForeignKey(UGCComment, on_delete=models.CASCADE)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
+	
+	game = models.ForeignKey(Game, on_delete=models.CASCADE)
+	ugc = models.ForeignKey(UGC, on_delete=models.CASCADE)
 
 	def __str__(self):
 		return self.user.username

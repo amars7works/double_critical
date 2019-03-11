@@ -21,7 +21,6 @@ from bgg import urls as bggUrls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^auth/', include('social_django.urls', namespace='social')),
     url(r'^', include(registrationUrls)),
     url(r'^bgg/', include(bggUrls)),
 
