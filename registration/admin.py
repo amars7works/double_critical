@@ -9,10 +9,10 @@ class ProfileAdmin(admin.ModelAdmin):
 class CountryAdmin(admin.ModelAdmin):
 	list_display = ('country_name','country_code',)
 
-# class SocialLoginAdmin(admin.ModelAdmin):
-# 	list_display = ('name', 'provider')
+class SocialLoginAdmin(admin.ModelAdmin):
+	list_display = ('user', 'client_id')
 
 admin.site.register(Profile,ProfileAdmin)
 admin.site.register(Country,CountryAdmin)
 admin.site.register(State)
-admin.site.register(SocialLogin)
+admin.site.register(SocialLogin,SocialLoginAdmin)

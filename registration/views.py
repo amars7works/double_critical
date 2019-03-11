@@ -116,31 +116,64 @@ def user_authentication_status(request):
 
 class Sociallogin(APIView):
 	def post(self,request,format="json"):
+		provider = request.data.get('provider', None)
+
 		email = request.data.get('email', None)
-		access_token = request.data.get('accessToken', None)
-		first_name = request.data.get('givenName', None)
-		last_name = request.data.get('familyName', None)
+		access_token = request.data.get('access_token', None)
+		first_name = request.data.get('given_name', None)
+		last_name = request.data.get('family_name', None)
+
+		client_id = request.data.get('client_id', None)
+		refresh_token = request.data.get('refresh_token', None)
+		id_token = request.data.get('id_token', None)
+		access_token_expiry = request.data.get('access_token_expiry', None)
+
 		try:
-			profile_obj = Profile.objects.get(user__email=email)
+			user_obj = User.objects.get(email=email)
+
+			profile_obj = Profile.objects.get(user=user_obj)
 			if profile_obj:
 				profile_obj.user.first_name=first_name
 				profile_obj.user.last_name=last_name
-				profile_obj.token=access_token
 				profile_obj.save()
-			# return Response(status=status.HTTP_200_OK)
+
+			try:
+				login_obj = SocialLogin.objects.get(user=user_obj)
+			except ObjectDoesNotExist:
+				social_login_obj = SocialLogin.objects.create(user=user_obj,client_id=client_id,
+										id_token=id_token, access_token_expiry=access_token_expiry)
+
+			if provider == "Google":
+				login_obj.google_access_token = access_token
+				login_obj.google_refresh_token = refresh_token
+				login_obj.save()
+			else:
+				login_obj.facebook_access_token = access_token
+				login_obj.facebook_refresh_token = refresh_token
+				login_obj.save()
+			return Response(status=status.HTTP_200_OK)
+
 		except ObjectDoesNotExist:
-			# we have to create user and profile here
-			print ('----------------------------------------------------')
-			return HttpResponseRedirect("../../")
-			# User.objects.create(first_name=first_name, last_name=last_name, 
-			# 						email=email, token=access_token)
-			# social_login_obj = SocialLogin.objects.create(**request.data)
+			username = first_name+last_name
+			chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+			password = get_random_string(6, chars)
 
-		# URL = request.data.get('url', None)
+			user = User.objects.create(first_name=first_name, last_name=last_name, 
+									email=email, username=username, password=password)
+			profile = Profile.objects.create(user=user,)
+			socail = SocialLogin.objects.create(user=user_obj,client_id=client_id,
+										id_token=id_token, access_token_expiry=access_token_expiry)
 
-		# with urllib.request.urlopen(URL) as url:
-		# 	data = url.read().decode()
-		# 	print('===========',type(data), '---------', data)
+			if provider == "Google":
+				socail.google_access_token = access_token
+				socail.google_refresh_token = refresh_token
+				socail.save()
+			else:
+				socail.facebook_access_token = access_token
+				socail.facebook_refresh_token = refresh_token
+				socail.save()
+
+			return Response(status=status.HTTP_200_OK)
 
 	def put(self,request,format="json"):
 		provider = request.data.get('provider', None)

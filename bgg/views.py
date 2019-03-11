@@ -21,7 +21,7 @@ class GameCorrection(APIView):
 
 class UserFollow(APIView):
 	def get(self,request,format="json"):
-		follower_user = User.objects.get(id=request.data.get('follower', None))
+		follower_user = User.objects.get(id=request.GET.get('follower', None))
 		qs = FollowUser.objects.filter(follower=follower_user)
 
 	def post(self, request, format="json"):
@@ -119,7 +119,7 @@ class GameFollow(APIView):
 
 class CollectingGame(APIView):
 	def get(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=request.GET.get('user', None))
 		game_coll_qs = GameCollection.objects.filter(user=user)
 		games_names = []
 		for game_coll in game_coll_qs:
@@ -128,6 +128,7 @@ class CollectingGame(APIView):
 		response = {}
 		game_qs = Game.objects.filter(name__in=games_names)
 		for game_obj in game_qs:
+			response[game_obj.name] = {}
 			# game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 			# game_obj.__dict__.update(game_extend_obj.__dict__)
 			# response.append(game_obj.__dict__)
@@ -243,15 +244,29 @@ class Ugclikes(APIView):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class UgcComment(APIView):
+	def get(self, request, format="json"):
+		response = {}
+		ugc_comments = UGCComment.objects.all().order_by('-created_at')
+
+		for comment in ugc_comments:
+			comment_dict = model_to_dict(comment)
+			response[comment.game.name] = {}
+			response[comment.game.name].update(user__username=comment.user.username)
+			response[comment.game.name].update(ugc__ugc_title=comment.ugc.ugc_title)
+			response[comment.game.name].update(ugc_comment=comment.ugc_comment)
+			response[comment.game.name].update(id=comment.id)
+
+		return JsonResponse(response)
+
 	def post(self, request, format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
 		game = Game.objects.get(id=request.data.get('game', None))
-		ugc_comments = request.data.get('ugc_comments', None)
+		ugc_comment = request.data.get('ugc_comment', None)
 		
 		ugc_comment_obj = UGCComment.objects.create(user=user,
 								ugc=ugc,game=game,
-								ugc_comments=ugc_comments)
+								ugc_comment=ugc_comment)
 
 		return Response(status=status.HTTP_200_OK)
 
@@ -259,12 +274,12 @@ class UgcComment(APIView):
 		user = User.objects.get(id=request.data.get('user', None))
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
 		game = Game.objects.get(id=request.data.get('game', None))
-		ugc_comments = request.data.get('ugc_comments', None)
+		ugc_comment = request.data.get('ugc_comment', None)
 		try:
 			ugc_comment_obj = UGCComment.objects.get(user=user,
 									ugc=ugc,game=game)
-			if ugc_comment_obj.ugc_comments!=ugc_comments:
-				ugc_comment_obj.ugc_comments=ugc_comments
+			if ugc_comment_obj.ugc_comment!=ugc_comment:
+				ugc_comment_obj.ugc_comment=ugc_comment
 				ugc_comment_obj.created_at=datetime.datetime.now()
 				ugc_comment_obj.updated_at=datetime.datetime.now()
 				ugc_comment_obj.save()
@@ -539,7 +554,7 @@ class HotorNotSwipe(APIView):
 class DiscoveryModeHotorNot(APIView):
 	def get(self,request,format="json"):
 		response = {}
-		game_obj = Game.objects.get(id=request.data.get('game', None))
+		game_obj = Game.objects.get(id=request.GET.get('game', None))
 		response[game_obj.name] = {}
 		# game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 		# game_obj.__dict__.update(game_extend_obj.__dict__)
@@ -598,8 +613,8 @@ class DiscoveryModeSwipe(APIView):
 
 class UserCommonGame(APIView):
 	def get(self,request,format="json"):
-		follower = User.objects.get(id=request.data.get('user', None))
-		following = User.objects.get(id=request.data.get('other_user', None))
+		follower = User.objects.get(id=request.GET.get('user', None))
+		following = User.objects.get(id=request.GET.get('other_user', None))
 		follower_games = FollowGame.objects.filter(user=follower)
 		following_games = FollowGame.objects.filter(user=following)
 	
@@ -629,7 +644,7 @@ class UserCommonGame(APIView):
 
 class Search(APIView):
 	def get(self, request, format="json"):
-		data = request.data.get('data', None)
+		data = request.GET.get('data', None)
 		game_name_qs = Game.objects.filter(name=data).order_by('name')
 		print (game_name_qs, '-----------------------')
 		game_category_qs = Game.objects.filter(category__category_name=data).order_by('name')

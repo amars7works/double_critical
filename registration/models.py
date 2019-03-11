@@ -19,21 +19,19 @@ class Country(models.Model):
 
 class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
-	date_of_birth = models.DateField()
+	date_of_birth = models.DateField(blank=True, null=True)
 
-	state = models.ForeignKey(State, 
-				related_name='state')
+	state = models.ForeignKey(State, related_name='state', 
+							blank=True, null=True)
 
 	provinence = models.CharField(max_length=25, blank=True, null=True)
 
-	country  = models.ForeignKey(Country, 
-				related_name='country')
+	country  = models.ForeignKey(Country, related_name='country',
+							blank=True, null=True)
 
 	otp = models.CharField(max_length=4, blank=True, null=True)
 
 	terms_conditions = models.BooleanField(default=False)
-
-	token = models.CharField(max_length=50, blank=True, null=True)
 
 	newsletter = models.BooleanField(default=False)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -44,16 +42,13 @@ class Profile(models.Model):
 
 class SocialLogin(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-	# name = models.CharField(max_length=35,blank=True,null=True)
-	# family_name = models.CharField(max_length=35,blank=True,null=True)
-	# given_name = models.CharField(max_length=35,blank=True,null=True)
-	# birthdate = models.DateTimeField(blank=True,null=True)
 	client_id = models.CharField(max_length=250,null=True)
-	refresh_token = models.TextField(blank=True,null=True)
+	google_refresh_token = models.TextField(blank=True,null=True)
+	facebook_refresh_token = models.TextField(blank=True,null=True)
 	google_access_token = models.TextField(blank=True,null=True)
 	facebook_access_token = models.TextField(blank=True,null=True)
 	id_token = models.TextField(blank=True,null=True)
-	access_token_expiration_date = models.DateTimeField()
+	access_token_expiry = models.DateTimeField()
 
 	def __str__(self):
-		return str(self.name)
+		return str(self.user)

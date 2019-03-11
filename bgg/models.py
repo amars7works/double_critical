@@ -153,7 +153,7 @@ class UGCLike(models.Model):
 class UGCComment(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
-	ugc_comments = models.TextField(blank=True,null=True)
+	ugc_comment = models.TextField(blank=True,null=True)
 	ugc = models.ForeignKey(UGC, on_delete=models.CASCADE)
 	
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
