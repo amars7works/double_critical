@@ -33,7 +33,7 @@ class Game(models.Model):
 	mechanism = models.CharField(max_length=60, null=True)
 	views = models.IntegerField(blank=True,null=True)
 	like_count = models.IntegerField(blank=True,null=True)
-	status = models.CharField(
+	game_status = models.CharField(
 				choices = STATUS_CHOICES,
 				default='review',
 				max_length = 10
