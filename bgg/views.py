@@ -574,7 +574,7 @@ class HotorNotSwipe(APIView):
 				game = Game.objects.get(id=likegame.game_id)
 				response[game.name]={}
 			response[game.name].update(like_count = game.like_count)
-				response[game.name].update(dislike_count = None)
+			response[game.name].update(dislike_count = None)
 
 		game_objs = Game.objects.filter(category__in=game_category)
 		for game in game_objs:
@@ -590,7 +590,7 @@ class HotorNotSwipe(APIView):
 			if game.id not in game_ids:
 				response[gameobj.name] = {}
 			response[gameobj.name].update(like_count = gameobj.like_count)
-				response[gameobj.name].update(dislike_count = None)
+			response[gameobj.name].update(dislike_count = None)
 
 		return JsonResponse(response)
 
