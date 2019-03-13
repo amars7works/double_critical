@@ -53,7 +53,7 @@ class Game(models.Model):
 		return self.name
 	
 	class Meta:
-		unique_together = ('name',)
+		unique_together = ('name', 'category')
 
 class GameExtend(models.Model):
 	game = models.OneToOneField(Game, on_delete=models.CASCADE,null=True)
@@ -132,7 +132,7 @@ class UGC(models.Model):
 		return self.ugc_title
 
 	class Meta:
-		unique_together = ('user', 'ugc_title')
+		unique_together = ('user', 'game', 'ugc_title')
 
 class UGCLike(models.Model):
 	LIKE_CHOICES = (
@@ -177,7 +177,7 @@ class UGCCommentLike(models.Model):
 		return self.user.username
 
 	class Meta:
-		unique_together = ('user', 'ugc_comment')
+		unique_together = ('user', 'ugc_comment', 'game', 'ugc')
 
 class FollowUser(models.Model):
 	follower = models.ForeignKey(User, null=True, related_name='follower')
@@ -220,6 +220,9 @@ class UGCReport(models.Model):
 	def __str__(self):
 		return self.user.username
 
+	class Meta:
+		unique_together = ('user', 'ugc')
+
 class Tags(models.Model):
 	tag = models.CharField(max_length=30)
 
@@ -233,3 +236,6 @@ class GameTag(models.Model):
 
 	def __str__(self):
 		return self.game_name.name
+
+	class Meta:
+		unique_together = ('game_name', 'tag_name')

@@ -493,19 +493,20 @@ class GameFollowingFeed(APIView):
 
 		response = {}
 		follow_game = []
-		following_users = []
+		# following_users = []
 
 		follow_game_qs = FollowGame.objects.filter(user=follower)
 		for follow_game_obj in follow_game_qs:
 			follow_game.append(follow_game_obj.game.id)
-		game_qs = Game.objects.filter(id__in=follow_game).order_by('-like_count')
+		# game_qs = Game.objects.filter(id__in=follow_game).order_by('-like_count')
 
-		for game_obj in game_qs:
-			UGC.objects.filter(game__in=follow_game).\
-							order_by('-created_at')
-			response[game_obj.name]={}
-			response[game_obj.name].update(like_count = game_obj.like_count)
-			response[game_obj.name].update(dislike_count = None)
+		ugc_obj = UGC.objects.filter(game__in=follow_game).latest('created_at')
+		date_from = datetime.datetime.now() - datetime.timedelta(days=1)
+		if ugc_obj.created_at.date() == date_from.date() or datetime.date.today():
+			response[ugc_obj.game.name]={}
+			response[ugc_obj.game.name].update(like_count = ugc_obj.like_count)
+			response[ugc_obj.game.name].update(user = ugc_obj.user.username)
+			response[ugc_obj.game.name].update(ugc_title = ugc_obj.ugc_title)
 
 
 		# user_follow_qs = FollowUser.objects.filter(

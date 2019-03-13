@@ -56,7 +56,6 @@ class UserCreate(APIView):
 				return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 def generate_otp():
 	otp = get_random_string(4, allowed_chars='0123456789')
 	return otp
@@ -72,9 +71,9 @@ class ForgotPassword(APIView):
 			profile_obj.__dict__.update(otp=otp)
 			profile_obj.save()
 			message = """
-				Hi %s,
+				Hi {},
 
-				%s is One Time Password to rest your Account
+				{}is One Time Password to rest your Account
 
 				Sincerely,
 				Double Critical

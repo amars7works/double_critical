@@ -20,7 +20,7 @@ class GameCollectionAdmin(admin.ModelAdmin):
 
 
 class UGCAdmin(admin.ModelAdmin):
-	list_display = ('user','ugc_title','like_count','created_at',)
+	list_display = ('user','game','ugc_title','like_count','created_at')
 
 
 class UGCLikeAdmin(admin.ModelAdmin):
