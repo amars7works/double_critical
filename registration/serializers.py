@@ -8,6 +8,8 @@ from .models import *
 class UserProfileSerializer(serializers.ModelSerializer):
 	username = serializers.CharField(source='user.username')
 	email = serializers.EmailField(source='user.email')
+	first_name = serializers.CharField(source='user.first_name')
+	last_name = serializers.CharField(source='user.last_name')
 	password = serializers.CharField(source='user.password',write_only=True)
 
 	def validate_username(self,username):
@@ -46,6 +48,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 	def update(self, instance, validated_data):
 		user = instance.user
 		user.email = validated_data.get('email',user.email)
+		user.first_name = validated_data.get('first_name',user.first_name)
+		user.last_name = validated_data.get('last_name',user.last_name)
 		user.save()
 		instance.date_of_birth = validated_data.get('date_of_birth',instance.date_of_birth)
 		instance.country = validated_data.get('country', instance.country)
@@ -53,4 +57,4 @@ class UserProfileSerializer(serializers.ModelSerializer):
 		instance.newsletter = validated_data.get('newsletter', instance.newsletter)
 		instance.save()
 		return instance
-		
+

@@ -502,7 +502,7 @@ class GameFollowingFeed(APIView):
 
 		ugc_obj = UGC.objects.filter(game__in=follow_game).latest('created_at')
 		date_from = datetime.datetime.now() - datetime.timedelta(days=1)
-		if ugc_obj.created_at.date() == date_from.date() or datetime.date.today():
+		if ugc_obj.created_at.date() == (date_from.date() or datetime.date.today()):
 			response[ugc_obj.game.name]={}
 			response[ugc_obj.game.name].update(like_count = ugc_obj.like_count)
 			response[ugc_obj.game.name].update(user = ugc_obj.user.username)
@@ -528,29 +528,31 @@ class GameFollowingFeed(APIView):
 class UserFollowingFeed(APIView):
 	def get(self,request,format="json"):
 		follower = User.objects.get(id=request.GET.get('follower', None))
+		date_from = datetime.datetime.now() - datetime.timedelta(days=1)
 		response = {}
-		user_follow_qs = FollowUser.objects.filter(
-							follower=follower)
+		user_follow_qs = FollowUser.objects.filter(follower=follower)
 		following_users = []
 		for user_follow_obj in user_follow_qs:
 			following_users.append(user_follow_obj.following)
 
-		ugc_qs = UGC.objects.filter(user__in=following_users).\
-							order_by('-created_at')
-		for ugc_obj in ugc_qs:
-			response[ugc_obj.user.username]={}
-			response[ugc_obj.user.username].update(ugc_title = ugc_obj.ugc_title)
+		ugc_obj = UGC.objects.filter(user__in=following_users).latest('created_at')
+		if ugc_obj.created_at.date() == (date_from.date() or datetime.date.today()):
+			response[ugc_obj.game.name]={}
+			response[ugc_obj.game.name].update(like_count = ugc_obj.like_count)
+			response[ugc_obj.game.name].update(user = ugc_obj.user.username)
+			response[ugc_obj.game.name].update(ugc_title = ugc_obj.ugc_title)
 
 
-		game_collection_qs = GameCollection.objects.filter(
-							user__in=following_users).order_by('-created_at')
+		game_collection = GameCollection.objects.filter(
+							user__in=following_users).latest('created_at')
 
-		for game_collection in game_collection_qs:
+		# for game_collection in game_collection_qs:
+		if game_collection.created_at.date() == (date_from.date() or datetime.date.today()):
 			# if game_collection.game.id not in follow_game:
-			game_object = Game.objects.get(name=game_collection.game)
-			response[game_object.name] = {}
-			response[game_object.name].update(like_count = game_object.like_count)
-			response[game_object.name].update(dislike_count = None)
+			# game_object = Game.objects.get(name=game_collection.game)
+			response[game_collection.game.name] = {}
+			response[game_collection.game.name].update(like_count = game_collection.game.like_count)
+			response[game_collection.game.name].update(dislike_count = None)
 
 		return JsonResponse(response)
 
