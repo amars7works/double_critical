@@ -161,16 +161,14 @@ class CollectingGame(APIView):
 class Ugc(APIView):
 	def get(self, request, format="json"):
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
-		try:
-			response = {}
-			ugc_obj = UGC.objects.get(game__name=game_obj.name)
-			ugc_comment = UGCComment.objects.filter(ugc__ugc_title=ugc_obj.ugc_title)
-			response[ugc_obj.ugc_title] = {}
-			response[ugc_obj.ugc_title].update(user=ugc_obj.user.username)
-			response[ugc_obj.ugc_title].update(comments_count=ugc_comment.count())
-			return JsonResponse(response)
-		except ObjectDoesNotExist:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
+		response = {}
+		ugc_obj = UGC.objects.filter(game__name=game_obj.name).latest('created_at')
+		ugc_comment = UGCComment.objects.filter(ugc__ugc_title=ugc_obj.ugc_title)
+		response[ugc_obj.ugc_title] = {}
+		response[ugc_obj.ugc_title].update(user=ugc_obj.user.username)
+		response[ugc_obj.ugc_title].update(comments_count=ugc_comment.count())
+
+		return JsonResponse(response)
 
 	def post(self, request, format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
@@ -417,14 +415,16 @@ class CreateGame(APIView):
 
 class TrendingGames(APIView):
 	def get(self,request,format="json"):
-		game_qs = Game.objects.all().order_by('-like_count')
-
+		game_qs = Game.objects.all().order_by('like_count')
+		print (game_qs, '--------------------------')
 		games = {}
 		for game_obj in game_qs:
 			games[game_obj.name]={}
 			games[game_obj.name].update(like_count = game_obj.like_count)
 			games[game_obj.name].update(dislike_count = None)
-		return JsonResponse(games)
+
+		# return JsonResponse(serializers.serialize('json', game_qs), safe=False)
+		return JsonResponse(dict(sorted(games.items())))
 
 class LikeGames(APIView):
 	def post(self,request,format="json"):
@@ -502,13 +502,11 @@ class GameFollowingFeed(APIView):
 
 		ugc_obj = UGC.objects.filter(game__in=follow_game).latest('created_at')
 		date_from = datetime.datetime.now() - datetime.timedelta(days=1)
-		if ugc_obj.created_at.date() == (date_from.date() or datetime.date.today()):
+		if ugc_obj.created_at.date() == date_from.date() or datetime.date.today():
 			response[ugc_obj.game.name]={}
 			response[ugc_obj.game.name].update(like_count = ugc_obj.like_count)
 			response[ugc_obj.game.name].update(user = ugc_obj.user.username)
 			response[ugc_obj.game.name].update(ugc_title = ugc_obj.ugc_title)
-
-
 		# user_follow_qs = FollowUser.objects.filter(
 		# 					follower=follower)
 		# for user_follow_obj in user_follow_qs:
@@ -523,31 +521,53 @@ class GameFollowingFeed(APIView):
 		# 		response[game_object.name].update(like_count = game_object.like_count)
 		# 		response[game_object.name].update(dislike_count = None)
 		
-		return JsonResponse(response)
+# 		return JsonResponse(response)
 
-class UserFollowingFeed(APIView):
-	def get(self,request,format="json"):
-		follower = User.objects.get(id=request.GET.get('follower', None))
-		date_from = datetime.datetime.now() - datetime.timedelta(days=1)
-		response = {}
+# class GameFollowingFeedList(APIView):
+# 	def get(self,request,format="json"):
+# 		follower = User.objects.get(id=request.GET.get('follower', None))
+
+# 		response = {}
+# 		follow_game = []
+
+# 		follow_game_qs = FollowGame.objects.filter(user=follower)
+# 		for follow_game_obj in follow_game_qs:
+# 			follow_game.append(follow_game_obj.game.id)
+
+# 		ugc_qs = UGC.objects.filter(game__in=follow_game).order_by('-created_at')
+# 		date_from = datetime.datetime.now() - datetime.timedelta(days=1)
+# 		for ugc_obj in ugc_qs:
+# 			print (ugc_obj.game.name, '+++++++++++++++++++')
+# 			response[ugc_obj.game.name]={}
+# 			response[ugc_obj.game.name].update(like_count = ugc_obj.like_count)
+# 			response[ugc_obj.game.name].update(user = ugc_obj.user.username)
+# 			response[ugc_obj.game.name].update(ugc_title = ugc_obj.ugc_title)
+
+# 		return JsonResponse(response)
+
+# class UserFollowingFeed(APIView):
+# 	def get(self,request,format="json"):
+# 		follower = User.objects.get(id=request.GET.get('follower', None))
+# 		date_from = datetime.datetime.now() - datetime.timedelta(days=1)
+# 		response = {}
 		user_follow_qs = FollowUser.objects.filter(follower=follower)
 		following_users = []
 		for user_follow_obj in user_follow_qs:
 			following_users.append(user_follow_obj.following)
 
-		ugc_obj = UGC.objects.filter(user__in=following_users).latest('created_at')
-		if ugc_obj.created_at.date() == (date_from.date() or datetime.date.today()):
-			response[ugc_obj.game.name]={}
-			response[ugc_obj.game.name].update(like_count = ugc_obj.like_count)
-			response[ugc_obj.game.name].update(user = ugc_obj.user.username)
-			response[ugc_obj.game.name].update(ugc_title = ugc_obj.ugc_title)
+		ugc = UGC.objects.filter(user__in=following_users).latest('created_at')
+		if ugc.created_at.date() == date_from.date() or datetime.date.today():
+			response[ugc.game.name]={}
+			response[ugc.game.name].update(like_count = ugc.like_count)
+			response[ugc.game.name].update(user = ugc.user.username)
+			response[ugc.game.name].update(ugc_title = ugc.ugc_title)
 
 
 		game_collection = GameCollection.objects.filter(
 							user__in=following_users).latest('created_at')
 
 		# for game_collection in game_collection_qs:
-		if game_collection.created_at.date() == (date_from.date() or datetime.date.today()):
+		if game_collection.created_at.date() == date_from.date() or datetime.date.today():
 			# if game_collection.game.id not in follow_game:
 			# game_object = Game.objects.get(name=game_collection.game)
 			response[game_collection.game.name] = {}
@@ -621,27 +641,30 @@ class DiscoveryModeSwipe(APIView):
 
 		games = Game.objects.filter(id__in=game_ids)
 		for game_obj in games:
-			response[game_obj.name]={}
+			# response[game_obj.name]={}
 			game_category.append(game_obj.category)
-			response[game_obj.name].update(like_count = game_obj.like_count)
-			response[game_obj.name].update(dislike_count = None)
+			# response[game_obj.name].update(like_count = game_obj.like_count)
+			# response[game_obj.name].update(dislike_count = None)
+			response.update(game_name=game_obj.name, game_id=game_obj.id)
 
 
 		game_objs = Game.objects.filter(category__in=game_category)
 		for game in game_objs:
 			if game.id not in game_ids:
-				response[game.name] = {}
-				response[game.name].update(like_count = game.like_count)
-				response[game.name].update(dislike_count = None)
+				# response[game.name] = {}
+				# response[game.name].update(like_count = game.like_count)
+				# response[game.name].update(dislike_count = None)
+				response.update(game_name=game_obj.name, game_id=game_obj.id)
 
 
 		game_collection = GameCollection.objects.filter(user=user)
 		for game_coll in game_collection:
 			gameobj = Game.objects.get(name=game_coll.game)
 			if game.id not in game_ids:
-				response[gameobj.name] = {}
-				response[gameobj.name].update(like_count = gameobj.like_count)
-				response[gameobj.name].update(dislike_count = None)
+				# response[gameobj.name] = {}
+				# response[gameobj.name].update(like_count = gameobj.like_count)
+				# response[gameobj.name].update(dislike_count = None)
+				response.update(game_name=game_obj.name, game_id=game_obj.id)
 
 		return JsonResponse(response)
 

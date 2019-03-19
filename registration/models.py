@@ -21,13 +21,11 @@ class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	date_of_birth = models.DateField(blank=True, null=True)
 
-	state = models.ForeignKey(State, related_name='state', 
-							blank=True, null=True)
+	state = models.CharField(max_length=5)
 
 	provinence = models.CharField(max_length=25, blank=True, null=True)
 
-	country  = models.ForeignKey(Country, related_name='country',
-							blank=True, null=True)
+	country = models.CharField(max_length=5)
 
 	otp = models.CharField(max_length=4, blank=True, null=True)
 

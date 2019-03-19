@@ -19,7 +19,7 @@ class Game(models.Model):
 		('kickstarted','KICKSTARTED')
 		)
 
-	name = models.CharField(max_length=20, null=True)
+	name = models.CharField(max_length=80, null=True)
 	year_published = models.IntegerField(null=True)
 	minimum_players = models.IntegerField(null=True)
 	maximum_players = models.IntegerField(null=True)
