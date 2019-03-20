@@ -131,10 +131,10 @@ class DiscoveryModeSwipe(APIView):
 		game_collection = GameCollection.objects.filter(user=user)
 		for game_coll in game_collection:
 			gameobj = Game.objects.get(name=game_coll.game)
-			if game.id not in game_ids:
+			if gameobj.id not in game_ids:
 				# response[gameobj.name] = {}
 				# response[gameobj.name].update(like_count = gameobj.like_count)
 				# response[gameobj.name].update(dislike_count = None)
-				response.update(game_name=game_obj.name, game_id=game_obj.id)
+				response.update(game_name=gameobj.name, game_id=gameobj.id)
 
 		return JsonResponse(response)
