@@ -37,6 +37,9 @@ INSTALLED_APPS = (
     
     'registration',
     'bgg',
+    'game',
+    'ugc',
+    'search',
 )
 
 MIDDLEWARE_CLASSES = (

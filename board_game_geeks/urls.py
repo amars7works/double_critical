@@ -17,11 +17,17 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from registration import urls as registrationUrls
 from bgg import urls as bggUrls
+from ugc import urls as ugcUrls
+from game import urls as gameUrls
+from search import urls as searchUrls
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include(registrationUrls)),
     url(r'^bgg/', include(bggUrls)),
+    url(r'^', include(searchUrls)),
+    url(r'^', include(gameUrls)),
+    url(r'^', include(ugcUrls)),
 
 ]
