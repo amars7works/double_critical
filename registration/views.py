@@ -121,6 +121,7 @@ class Sociallogin(APIView):
 		access_token = request.data.get('access_token', None)
 		first_name = request.data.get('given_name', None)
 		last_name = request.data.get('family_name', None)
+		username = request.data.get('username', None)
 
 		client_id = request.data.get('client_id', None)
 		refresh_token = request.data.get('refresh_token', None)
@@ -153,7 +154,8 @@ class Sociallogin(APIView):
 			return Response(status=status.HTTP_200_OK)
 
 		except ObjectDoesNotExist:
-			username = first_name+last_name
+			if username:
+				username = first_name+last_name
 			chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
 			password = get_random_string(6, chars)
 

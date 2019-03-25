@@ -10,6 +10,7 @@ from game.models import *
 from ugc.models import *
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
+from django.forms.models import model_to_dict
 
 class UserFollow(APIView):
 	# def get(self,request,format="json"):
@@ -90,13 +91,20 @@ class HotorNotSwipe(APIView):
 
 class DiscoveryModeHotorNot(APIView):
 	def get(self,request,format="json"):
-		response = {}
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
-		response[game_obj.name] = {}
-		response[game_obj.name].update(like_count = game_obj.like_count)
-		response[game_obj.name].update(dislike_count = None)
 
-		return JsonResponse(response)
+		game_obj_dict = model_to_dict(game_obj)
+		try:
+			response = {}
+			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+			game_extend_obj_dict = model_to_dict(game_extend_obj)
+
+			response.update(game_obj_dict)
+			response.update(game_extend_obj_dict)
+			return JsonResponse(response)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 class DiscoveryModeSwipe(APIView):
 	def get(self,request,format="json"):
