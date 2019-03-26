@@ -21,6 +21,18 @@ class GameCorrection(APIView):
 		return Response(status=status.HTTP_201_CREATED)
 
 class GameRating(APIView):
+	def get(self, request, format="json"):
+		# user_id = request.user.id
+		user = User.objects.get(id=request.GET.get('user', None))
+		print (user, '================================')
+		game = Game.objects.get(id=request.GET.get('game', None))
+		try:
+			game_rating_obj = RateGame.objects.get(user=user, game=game)
+			game_rating_dict = model_to_dict(game_rating_obj)
+			return JsonResponse(game_rating_dict)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
+
 	def post(self, request, format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
 		game = Game.objects.get(id=request.data.get('game', None))
@@ -220,22 +232,9 @@ class CreateGame(APIView):
 
 class TrendingGames(APIView):
 	def get(self,request,format="json"):
-		game_qs = Game.objects.all().order_by('-like_count')
-		response = []
-		games = {}
+		game_qs = Game.objects.extra(select={"count": 'like_count - dislike_count'}).order_by("-count")
 
-		for game in game_qs.values():
-			count = game['like_count'] - game['dislike_count']
-			if count >= 0:
-				games[count] = {}
-				games[count] = game
-		print (games, '================================')
-				# response.append(games)
-		for key in sorted(games, reverse=True):
-			response.append(games[key])
-
-		# print (response, '????????????????????????')
-		# games = [game for game in game_qs]
+		games = [game for game in game_qs.values()]
 
 		# games = []
 		# for game_obj in game_qs:
@@ -243,7 +242,7 @@ class TrendingGames(APIView):
 		# 	game_obj_dict = model_to_dict(game_obj)
 		# 	game_obj_dict.update(model_to_dict(game_extend_obj))
 
-		return JsonResponse(response, safe=False)
+		return JsonResponse(games, safe=False)
 
 class LikeGames(APIView):
 	def post(self,request,format="json"):
@@ -302,7 +301,7 @@ def like(game_like, game_obj):
 class GameFollowingFeed(APIView):
 	def get(self,request,format="json"):
 		follower = User.objects.get(id=request.GET.get('follower', None))
-
+		print (follower.id)
 		response = {}
 		follow_game = []
 		# following_users = []
@@ -366,7 +365,6 @@ class GameFollowingFeed(APIView):
 		following_users = []
 		for user_follow_obj in user_follow_qs:
 			following_users.append(user_follow_obj.following)
-
 		ugc = UGC.objects.filter(user__in=following_users).latest('created_at')
 		if ugc.created_at.date() == date_from.date() or datetime.date.today():
 			response[ugc.game.name]={}

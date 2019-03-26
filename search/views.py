@@ -4,30 +4,17 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from game.models import *
-
+from django.contrib.postgres.search import SearchQuery, SearchVector
+from django.forms.models import model_to_dict
 
 class Search(APIView):
 	def get(self, request, format="json"):
 		data = request.GET.get('data', None)
-		game_name_qs = Game.objects.filter(name=data).order_by('name')
-		print (game_name_qs, '-----------------------')
+		game_qs = Game.objects.filter(name__icontains=data).order_by('name')#.annotate(
+						# search=SearchVector('name'),
+						# ).filter(search=SearchQuery('Lord'))
+		# game = model_to_dict(game_qs)
+		# print (game, '----------------------')
+		games = [game for game in game_qs.values()]
 
-		game_category_qs = Game.objects.filter(category__category_name=data).order_by('name')
-		print (game_category_qs, '//////////////////////////')
-
-		game_tag_qs = GameTag.objects.filter(tag_name__tag=data).order_by('tag_name')
-		print (game_tag_qs, '=============================')
-
-
-		qs = game_name_qs.union(game_category_qs)
-
-		game_ids = []
-		for obj in game_name_qs:
-			game_ids.append(obj.id)
-
-		objs = {}
-
-		for obj in game_name_qs:
-			objs.update(obj)
-
-		return Response(status=status.HTTP_200_OK)
+		return JsonResponse(games, safe=False)

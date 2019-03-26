@@ -27,7 +27,8 @@ class Login(APIView):
 		user = authenticate(request, username=username, password=password)
 		if user:
 			login(request,user)
-			return Response({"user_status":user.is_authenticated()}, status=status.HTTP_200_OK)
+			return Response({"user_status":user.is_authenticated(), "user_id":user.id}, 
+						status=status.HTTP_200_OK)
 		else:
 			return Response(status=status.HTTP_401_UNAUTHORIZED)
 
@@ -184,8 +185,6 @@ class Sociallogin(APIView):
 	# 		return Response('user details created',status=status.HTTP_200_OK)
 
 class Facebooklogin(APIView):
-	#def get(self,request,format="json"):
-	#	print ('================================>IN THE GET METHOD')
 
 	def post(self,request,format="json"):
 		provider = 'facebook'
@@ -195,6 +194,7 @@ class Facebooklogin(APIView):
 		import urllib.request, json
 		with urllib.request.urlopen(URL) as url:
 			data = url.read().decode()
+
 		data = json.loads(data)
 
 		email = data['email']
@@ -219,7 +219,6 @@ class Facebooklogin(APIView):
 				login_obj.save()
 			except ObjectDoesNotExist:
 				social_login_obj = SocialLogin.objects.create(user=user_obj,client_id=client_id)
-			print ('-------------------------------------------')
 			return Response(status=status.HTTP_200_OK)
 
 		except ObjectDoesNotExist:
@@ -233,8 +232,6 @@ class Facebooklogin(APIView):
 			profile = Profile.objects.create(user=user,)
 			socail = SocialLogin.objects.create(user=user,client_id=client_id)
 
-			
 			socail.facebook_access_token = access_token
 			socail.save()
-			print ('===========================================')
 			return Response(status=status.HTTP_200_OK)
