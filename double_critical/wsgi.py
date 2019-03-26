@@ -1,5 +1,5 @@
 """
-WSGI config for board_game_geeks project.
+WSGI config for double_critical project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -28,9 +28,9 @@ def get_env_variable(var_name):
 DJANGO_EXECUTION_ENVIRONMENT = get_env_variable('DJANGO_EXECUTION_ENVIRONMENT')
 
 if DJANGO_EXECUTION_ENVIRONMENT == 'STAGING':
-	os.environ.setdefault("DJANGO_SETTINGS_MODULE", "board_game_geeks.settings.staging")
+	os.environ.setdefault("DJANGO_SETTINGS_MODULE", "double_critical.settings.staging")
 elif DJANGO_EXECUTION_ENVIRONMENT == 'PRODUCTION':
-	os.environ.setdefault("DJANGO_SETTINGS_MODULE", "board_game_geeks.settings.production")
+	os.environ.setdefault("DJANGO_SETTINGS_MODULE", "double_critical.settings.production")
 else:
 	if not DJANGO_EXECUTION_ENVIRONMENT:
 	  os.environ.setdefault("DJANGO_EXECUTION_ENVIRONMENT", 'LOCAL')

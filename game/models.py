@@ -32,8 +32,9 @@ class Game(models.Model):
 	publisher = models.CharField(max_length=60, null=True)
 	category = models.ForeignKey(GameCategory, on_delete=models.CASCADE,null=True)
 	mechanism = models.CharField(max_length=60, null=True)
-	views = models.IntegerField(blank=True,null=True)
-	like_count = models.IntegerField(blank=True,null=True)
+	views = models.IntegerField(default='0',blank=True,null=True)
+	like_count = models.IntegerField(default='0',blank=True,null=True)
+	dislike_count = models.IntegerField(default='0',blank=True,null=True)
 	game_status = models.CharField(
 				choices = STATUS_CHOICES,
 				default='review',

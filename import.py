@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 # Export the settings before running this file
 sys.path.append("/home/BGG/double-critical/")
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'board_game_geeks.settings.local'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'double_critical.settings.local'
 
 django.setup()
 
