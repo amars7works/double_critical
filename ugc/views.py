@@ -86,22 +86,23 @@ class Ugclikes(APIView):
 
 class UgcComment(APIView):
 	def get(self, request, format="json"):
-		response = {}
+		# response = {}
 		ugc = UGC.objects.get(id=request.GET.get('ugc', None))
 		game = Game.objects.get(id=request.GET.get('game', None))
 		
 		ugc_comments = UGCComment.objects.filter(game__name=game.name,
 								ugc__ugc_title=ugc.ugc_title
 								).order_by('-created_at')
+		response = [ugc_comment for ugc_comment in ugc_comments.values()]
 
-		for comment in ugc_comments:
-			comment_dict = model_to_dict(comment)
-			response[comment.game.name] = {}
-			response[comment.game.name].update(user__username=comment.user.username)
-			response[comment.game.name].update(ugc__ugc_title=comment.ugc.ugc_title)
-			response[comment.game.name].update(ugc_comment=comment.ugc_comment)
-			response[comment.game.name].update(id=comment.id)
-		return JsonResponse(response)
+		# for comment in ugc_comments:
+		# 	comment_dict = model_to_dict(comment)
+		# 	response[comment.game.name] = {}
+		# 	response[comment.game.name].update(user__username=comment.user.username)
+		# 	response[comment.game.name].update(ugc__ugc_title=comment.ugc.ugc_title)
+		# 	response[comment.game.name].update(ugc_comment=comment.ugc_comment)
+		# 	response[comment.game.name].update(id=comment.id)
+		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
 		user = User.objects.get(id=request.data.get('user', None))

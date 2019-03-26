@@ -121,6 +121,7 @@ class Sociallogin(APIView):
 		access_token = request.data.get('access_token', None)
 		first_name = request.data.get('given_name', None)
 		last_name = request.data.get('family_name', None)
+		username = request.data.get('username', None)
 
 		client_id = request.data.get('client_id', None)
 		refresh_token = request.data.get('refresh_token', None)
@@ -138,18 +139,13 @@ class Sociallogin(APIView):
 
 			try:
 				login_obj = SocialLogin.objects.get(user=user_obj)
+				login_obj.google_access_token = access_token
+				login_obj.google_refresh_token = refresh_token
+				login_obj.save()
 			except ObjectDoesNotExist:
 				social_login_obj = SocialLogin.objects.create(user=user_obj,client_id=client_id,
 										id_token=id_token, access_token_expiry=access_token_expiry)
 
-			if provider == "Google":
-				login_obj.google_access_token = access_token
-				login_obj.google_refresh_token = refresh_token
-				login_obj.save()
-			else:
-				login_obj.facebook_access_token = access_token
-				login_obj.facebook_refresh_token = refresh_token
-				login_obj.save()
 			return Response(status=status.HTTP_200_OK)
 
 		except ObjectDoesNotExist:
@@ -160,17 +156,12 @@ class Sociallogin(APIView):
 			user = User.objects.create(first_name=first_name, last_name=last_name, 
 									email=email, username=username, password=password)
 			profile = Profile.objects.create(user=user,)
-			socail = SocialLogin.objects.create(user=user_obj,client_id=client_id,
+			socail = SocialLogin.objects.create(user=user,client_id=client_id,
 										id_token=id_token, access_token_expiry=access_token_expiry)
 
-			if provider == "Google":
-				socail.google_access_token = access_token
-				socail.google_refresh_token = refresh_token
-				socail.save()
-			else:
-				socail.facebook_access_token = access_token
-				socail.facebook_refresh_token = refresh_token
-				socail.save()
+			socail.google_access_token = access_token
+			socail.google_refresh_token = refresh_token
+			socail.save()
 
 			return Response(status=status.HTTP_200_OK)
 
@@ -191,3 +182,59 @@ class Sociallogin(APIView):
 	# 		social_obj = SocialLogin.objects.create(provider=provider,name=name,client_id=client_id,
 	# 				refresh_token=refresh_token, access_token=access_token)
 	# 		return Response('user details created',status=status.HTTP_200_OK)
+
+class Facebooklogin(APIView):
+	def get(self,request,format="json"):
+		print ('================================>IN THE GET METHOD')
+
+	def post(self,request,format="json"):
+		provider = 'facebook'
+		access_token = request.data.get('access_token', None)
+
+		URL = request.data.get('url', None)
+		import urllib.request, json
+		with urllib.request.urlopen(URL) as url:
+			data = url.read().decode()
+		data = json.loads(data)
+
+		email = data['email']
+		first_name = data['first_name']
+		last_name = data['last_name']
+		username = data['name']
+		client_id = data['id']
+		# access_token = data['access_token']
+
+		try:
+			user_obj = User.objects.get(email=email)
+
+			profile_obj = Profile.objects.get(user=user_obj)
+			if profile_obj:
+				profile_obj.user.first_name=first_name
+				profile_obj.user.last_name=last_name
+				profile_obj.save()
+
+			try:
+				login_obj = SocialLogin.objects.get(user=user_obj)
+				login_obj.facebook_access_token = access_token
+				login_obj.save()
+			except ObjectDoesNotExist:
+				social_login_obj = SocialLogin.objects.create(user=user_obj,client_id=client_id)
+			print ('-------------------------------------------')
+			return Response(status=status.HTTP_200_OK)
+
+		except ObjectDoesNotExist:
+			if username:
+				username = first_name+last_name
+			chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+			password = get_random_string(6, chars)
+
+			user = User.objects.create(first_name=first_name, last_name=last_name, 
+									email=email, username=username, password=password)
+			profile = Profile.objects.create(user=user,)
+			socail = SocialLogin.objects.create(user=user,client_id=client_id)
+
+			
+			socail.facebook_access_token = access_token
+			socail.save()
+			print ('===========================================')
+			return Response(status=status.HTTP_200_OK)

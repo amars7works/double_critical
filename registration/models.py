@@ -46,7 +46,7 @@ class SocialLogin(models.Model):
 	google_access_token = models.TextField(blank=True,null=True)
 	facebook_access_token = models.TextField(blank=True,null=True)
 	id_token = models.TextField(blank=True,null=True)
-	access_token_expiry = models.DateTimeField()
+	access_token_expiry = models.DateTimeField(blank=True,null=True)
 
 	def __str__(self):
 		return str(self.user)

@@ -11,8 +11,10 @@ class Search(APIView):
 		data = request.GET.get('data', None)
 		game_name_qs = Game.objects.filter(name=data).order_by('name')
 		print (game_name_qs, '-----------------------')
+
 		game_category_qs = Game.objects.filter(category__category_name=data).order_by('name')
 		print (game_category_qs, '//////////////////////////')
+
 		game_tag_qs = GameTag.objects.filter(tag_name__tag=data).order_by('tag_name')
 		print (game_tag_qs, '=============================')
 

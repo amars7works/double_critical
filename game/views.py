@@ -7,7 +7,7 @@ from rest_framework import status
 from django.core import serializers
 from game.models import *
 from ugc.models import *
-from bgg.models import *
+from dc.models import *
 from rest_framework.decorators import api_view
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
@@ -221,8 +221,21 @@ class CreateGame(APIView):
 class TrendingGames(APIView):
 	def get(self,request,format="json"):
 		game_qs = Game.objects.all().order_by('-like_count')
-	
-		games = [game for game in game_qs.values()]
+		response = []
+		games = {}
+
+		for game in game_qs.values():
+			count = game['like_count'] - game['dislike_count']
+			if count >= 0:
+				games[count] = {}
+				games[count] = game
+		print (games, '================================')
+				# response.append(games)
+		for key in sorted(games, reverse=True):
+			response.append(games[key])
+
+		# print (response, '????????????????????????')
+		# games = [game for game in game_qs]
 
 		# games = []
 		# for game_obj in game_qs:
@@ -230,7 +243,7 @@ class TrendingGames(APIView):
 		# 	game_obj_dict = model_to_dict(game_obj)
 		# 	game_obj_dict.update(model_to_dict(game_extend_obj))
 
-		return JsonResponse(games, safe=False)
+		return JsonResponse(response, safe=False)
 
 class LikeGames(APIView):
 	def post(self,request,format="json"):
@@ -250,23 +263,27 @@ class LikeGames(APIView):
 		try:
 			like_game_obj = LikeGame.objects.get(user=user,game=game)
 			if game_like == 'dislike':
+				game.like_count -= 1
 				like_game_obj.game_like=game_like
 				like_game_obj.save()
+				game.save()
 				response = like(game_like,game)
 				return response
 			else:
+				game.dislike_count -= 1
 				like_game_obj.created_at=datetime.datetime.now()
 				like_game_obj.game_like=game_like
 				like_game_obj.save()
+				game.save()
 				response = like(game_like,game)
 				return response
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
-def like(game_like, game):
+def like(game_like, game_obj):
 	if game_like == 'like':
 		try:
-			game_obj = Game.objects.get(name=game.name)
+			# game_obj = Game.objects.get(name=game.name)
 			game_obj.like_count += 1
 			game_obj.save()
 			return Response(status=status.HTTP_200_OK)
@@ -274,8 +291,9 @@ def like(game_like, game):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 	else:
 		try:
-			game_obj = Game.objects.get(name=game.name)
-			game_obj.like_count -= 1
+			# game_obj = Game.objects.get(name=game_obj.name)
+			# game_obj.like_count -= 1
+			game_obj.dislike_count += 1
 			game_obj.save()
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:

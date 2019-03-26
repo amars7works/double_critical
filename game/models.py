@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+# from search.search import GameIndex
 
 class GameCategory(models.Model):
 	category_name = models.CharField(max_length=60, null=True)
@@ -31,8 +32,9 @@ class Game(models.Model):
 	publisher = models.CharField(max_length=60, null=True)
 	category = models.ForeignKey(GameCategory, on_delete=models.CASCADE,null=True)
 	mechanism = models.CharField(max_length=60, null=True)
-	views = models.IntegerField(blank=True,null=True)
-	like_count = models.IntegerField(blank=True,null=True)
+	views = models.IntegerField(default='0',blank=True,null=True)
+	like_count = models.IntegerField(default='0',blank=True,null=True)
+	dislike_count = models.IntegerField(default='0',blank=True,null=True)
 	game_status = models.CharField(
 				choices = STATUS_CHOICES,
 				default='review',
@@ -51,7 +53,31 @@ class Game(models.Model):
 
 	def __str__(self):
 		return self.name
-	
+	# Add indexing method to Game
+	# def indexing(self):
+	# 	obj = GameIndex(
+	# 			meta = {'id': self.id},
+	# 			name = self.name,
+	# 			year_published = self.year_published,
+	# 			minimum_players = self.minimum_players,
+	# 			maximum_players = self.maximum_players,
+	# 			mfg_suggested_ages = self.mfg_suggested_ages,
+	# 			minimum_playing_time = self.minimum_playing_time,
+	# 			maximum_playing_time = self.maximum_playing_time,
+	# 			designer = self.designer,
+	# 			artist = self.artist,
+	# 			publisher = self.publisher,
+	# 			category = self.category,
+	# 			mechanism = self.mechanism,
+	# 			views = self.views,
+	# 			like_count = self.like_count,
+	# 			game_status = self.game_status,
+	# 			upc = self.upc, hotornot = self.hotornot,
+	# 			origin = self.origin
+	# 	)
+	# 	obj.save()
+	# 	return obj.to_dict(include_meta=True)
+
 	class Meta:
 		unique_together = ('name', 'category')
 
