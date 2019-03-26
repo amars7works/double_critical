@@ -184,8 +184,8 @@ class Sociallogin(APIView):
 	# 		return Response('user details created',status=status.HTTP_200_OK)
 
 class Facebooklogin(APIView):
-	def get(self,request,format="json"):
-		print ('================================>IN THE GET METHOD')
+	#def get(self,request,format="json"):
+	#	print ('================================>IN THE GET METHOD')
 
 	def post(self,request,format="json"):
 		provider = 'facebook'
