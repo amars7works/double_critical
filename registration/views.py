@@ -185,6 +185,7 @@ class Sociallogin(APIView):
 	# 		return Response('user details created',status=status.HTTP_200_OK)
 
 class Facebooklogin(APIView):
+
 	def post(self,request,format="json"):
 		provider = 'facebook'
 		access_token = request.data.get('access_token', None)
@@ -231,7 +232,6 @@ class Facebooklogin(APIView):
 			profile = Profile.objects.create(user=user,)
 			socail = SocialLogin.objects.create(user=user,client_id=client_id)
 
-			
 			socail.facebook_access_token = access_token
 			socail.save()
 			return Response(status=status.HTTP_200_OK)
