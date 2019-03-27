@@ -112,7 +112,8 @@ class ResetPassword(APIView):
 
 @api_view(['GET'])
 def user_authentication_status(request):
-	return Response(request.user.is_authenticated(), status=status.HTTP_200_OK)
+	return Response({"user_status":request.user.is_authenticated(), 
+					"user_id":user.id}, status=status.HTTP_200_OK)
 
 class Googlelogin(APIView):
 	def post(self,request,format="json"):
