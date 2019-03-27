@@ -22,9 +22,8 @@ class GameCorrection(APIView):
 
 class GameRating(APIView):
 	def get(self, request, format="json"):
-		# user_id = request.user.id
+		# user = self.request.user.id
 		user = User.objects.get(id=request.GET.get('user', None))
-		print (user, '================================')
 		game = Game.objects.get(id=request.GET.get('game', None))
 		try:
 			game_rating_obj = RateGame.objects.get(user=user, game=game)
