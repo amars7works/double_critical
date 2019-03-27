@@ -2,12 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class State(models.Model):
-	state_name = models.CharField(max_length=20)
-
-	def __str__(self):
-		return self.state_name
-
 
 class Country(models.Model):
 	country_code =	models.CharField(max_length=5)
@@ -15,6 +9,14 @@ class Country(models.Model):
 
 	def __str__(self):
 		return self.country_name
+
+
+class State(models.Model):
+	country = models.ForeignKey(Country, on_delete=models.CASCADE)
+	state_name = models.CharField(max_length=20)
+
+	def __str__(self):
+		return self.state_name
 
 
 class Profile(models.Model):
