@@ -114,7 +114,7 @@ class ResetPassword(APIView):
 def user_authentication_status(request):
 	return Response(request.user.is_authenticated(), status=status.HTTP_200_OK)
 
-class Sociallogin(APIView):
+class Googlelogin(APIView):
 	def post(self,request,format="json"):
 		provider = request.data.get('provider', None)
 
