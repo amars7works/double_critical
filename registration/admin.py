@@ -9,7 +9,7 @@ class CountryAdmin(admin.ModelAdmin):
 	list_display = ('country_name','country_code',)
 
 class SocialLoginAdmin(admin.ModelAdmin):
-	list_display = ('user', 'client_id')
+	list_display = ('user', )
 
 admin.site.register(Profile,ProfileAdmin)
 admin.site.register(Country,CountryAdmin)

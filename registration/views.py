@@ -142,9 +142,10 @@ class Sociallogin(APIView):
 				login_obj = SocialLogin.objects.get(user=user_obj)
 				login_obj.google_access_token = access_token
 				login_obj.google_refresh_token = refresh_token
+				login_obj.google_client_id = client_id
 				login_obj.save()
 			except ObjectDoesNotExist:
-				social_login_obj = SocialLogin.objects.create(user=user_obj,client_id=client_id,
+				social_login_obj = SocialLogin.objects.create(user=user_obj,google_client_id=client_id,
 										id_token=id_token, access_token_expiry=access_token_expiry)
 
 			return Response(status=status.HTTP_200_OK)
@@ -157,11 +158,12 @@ class Sociallogin(APIView):
 			user = User.objects.create(first_name=first_name, last_name=last_name, 
 									email=email, username=username, password=password)
 			profile = Profile.objects.create(user=user,)
-			socail = SocialLogin.objects.create(user=user,client_id=client_id,
+			socail = SocialLogin.objects.create(user=user,google_client_id=client_id,
 										id_token=id_token, access_token_expiry=access_token_expiry)
 
 			socail.google_access_token = access_token
 			socail.google_refresh_token = refresh_token
+			socail.google_client_id = client_id
 			socail.save()
 
 			return Response(status=status.HTTP_200_OK)
@@ -216,9 +218,10 @@ class Facebooklogin(APIView):
 			try:
 				login_obj = SocialLogin.objects.get(user=user_obj)
 				login_obj.facebook_access_token = access_token
+				login_obj.facebook_client_id = client_id
 				login_obj.save()
 			except ObjectDoesNotExist:
-				social_login_obj = SocialLogin.objects.create(user=user_obj,client_id=client_id)
+				social_login_obj = SocialLogin.objects.create(user=user_obj,facebook_client_id=client_id)
 			return Response(status=status.HTTP_200_OK)
 
 		except ObjectDoesNotExist:
@@ -230,8 +233,9 @@ class Facebooklogin(APIView):
 			user = User.objects.create(first_name=first_name, last_name=last_name, 
 									email=email, username=username, password=password)
 			profile = Profile.objects.create(user=user,)
-			socail = SocialLogin.objects.create(user=user,client_id=client_id)
+			socail = SocialLogin.objects.create(user=user,facebook_client_id=client_id)
 
 			socail.facebook_access_token = access_token
+			socail.facebook_client_id = client_id
 			socail.save()
 			return Response(status=status.HTTP_200_OK)

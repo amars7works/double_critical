@@ -27,7 +27,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'double_critical',
         'USER': 'double-critical',
-        'PASSWORD': 'dc@123',
+        'PASSWORD': 'dc123456',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
