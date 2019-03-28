@@ -14,12 +14,8 @@ from django.contrib.auth.models import User
 class Ugc(APIView):
 	def get(self, request, format="json"):
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
-		# response = {}
 		ugc_obj = UGC.objects.filter(game__name=game_obj.name).latest('created_at')
 		ugc_comments = UGCComment.objects.filter(ugc__ugc_title=ugc_obj.ugc_title)
-		# response[ugc_obj.ugc_title] = {}
-		# response[ugc_obj.ugc_title].update(user=ugc_obj.user.username)
-		# response[ugc_obj.ugc_title].update(comments_count=ugc_comment.count())
 		response = [ugc_comment for ugc_comment in ugc_comments.values()]
 
 		return JsonResponse(response, safe=False)
@@ -56,6 +52,16 @@ class Ugc(APIView):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class Ugclikes(APIView):
+	def get(self, request, format="json"):
+		ugc = UGC.objects.get(id=request.data.get('ugc', None))
+
+		ugc_likes = UGCLike.objects.filter(ugc=ugc,
+								like_type='LIKE')
+		response = [ugc_like for ugc_like in ugc_likes.values()]
+
+		return JsonResponse(response, safe=False)
+
+
 	def post(self, request, format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
@@ -87,7 +93,6 @@ class Ugclikes(APIView):
 
 class UgcComment(APIView):
 	def get(self, request, format="json"):
-		# response = {}
 		ugc = UGC.objects.get(id=request.GET.get('ugc', None))
 		game = Game.objects.get(id=request.GET.get('game', None))
 		
@@ -96,13 +101,6 @@ class UgcComment(APIView):
 								).order_by('-created_at')
 		response = [ugc_comment for ugc_comment in ugc_comments.values()]
 
-		# for comment in ugc_comments:
-		# 	comment_dict = model_to_dict(comment)
-		# 	response[comment.game.name] = {}
-		# 	response[comment.game.name].update(user__username=comment.user.username)
-		# 	response[comment.game.name].update(ugc__ugc_title=comment.ugc.ugc_title)
-		# 	response[comment.game.name].update(ugc_comment=comment.ugc_comment)
-		# 	response[comment.game.name].update(id=comment.id)
 		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
@@ -138,6 +136,21 @@ class UgcComment(APIView):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class UgcCommentLike(APIView):
+	def get(self, request, format="json"):
+		ugc_comment = UGCComment.objects.get(id=request.data.get('ugc_comment', None))
+		ugc = UGC.objects.get(id=request.data.get('ugc', None))
+		game = Game.objects.get(id=request.data.get('game', None))
+		ugc_comment_likes = UGCCommentLike.objects.filter(ugc=ugc, 
+										ugc_comment=ugc_comment, game=game)
+		# response = [ugc_comment_like for ugc_comment_like in ugc_comment_likes.values()]
+		response = []
+		for ugc_comment_like in ugc_comment_likes.values():
+			if ugc_comment_like['created_at']:
+				response.append(ugc_comment_like)
+
+		return JsonResponse(response, safe=False)
+
+
 	def post(self, request, format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
 		ugc_comment = UGCComment.objects.get(id=request.data.get('ugc_comment', None))

@@ -154,7 +154,7 @@ class LikeGame(models.Model):
 		)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
-	views = models.IntegerField(blank=True,null=True)
+	views = models.IntegerField(blank=True,null=True, default='0')
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 	game_like = models.CharField(
 				max_length=10,
