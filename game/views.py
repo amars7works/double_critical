@@ -309,7 +309,6 @@ def like(game_like, game_obj):
 class GameFollowingFeed(APIView):
 	def get(self,request,format="json"):
 		follower = User.objects.get(id=request.GET.get('follower', None))
-		print (follower.id)
 		response = []
 		follow_game = []
 

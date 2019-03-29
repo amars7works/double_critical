@@ -9,9 +9,9 @@ from django.forms.models import model_to_dict
 
 class Search(APIView):
 	def get(self, request, format="json"):
-		data = request.GET.get('data', None)
+		text = request.GET.get('text', None)
 		vector = SearchVector('name') + SearchVector('category__category_name')
-		query = SearchQuery(data)
+		query = SearchQuery(text)
 		# game_qs = Game.objects.annotate(rank=SearchRank(
 						# vector, query)).filter(rank__gte=0.3).order_by('rank')
 		game_qs = Game.objects.annotate(search=vector).filter(search=query)
