@@ -146,7 +146,8 @@ class Googlelogin(APIView):
 				login_obj.google_client_id = client_id
 				login_obj.save()
 			except ObjectDoesNotExist:
-				social_login_obj = SocialLogin.objects.create(user=user_obj,google_client_id=client_id,
+				social_login_obj = SocialLogin.objects.create(
+										user=user_obj,google_client_id=client_id,
 										id_token=id_token, access_token_expiry=access_token_expiry)
 
 			return Response(status=status.HTTP_200_OK)
@@ -168,24 +169,6 @@ class Googlelogin(APIView):
 			socail.save()
 
 			return Response(status=status.HTTP_200_OK)
-
-	# def put(self,request,format="json"):
-	# 	provider = request.data.get('provider', None)
-	# 	name = request.data.get('name', None)
-	# 	client_id = request.data.get('client_id', None)
-	# 	refresh_token = request.data.get('refresh_token', None)
-	# 	access_token = request.data.get('access_token', None)
-	# 	try:
-	# 		social_obj = SocialLogin.objects.get(provider=provider,name=name)
-	# 		social_obj.__dict__.update(name=name)
-	# 		social_obj.__dict__.update(refresh_token=refresh_token)
-	# 		social_obj.__dict__.update(access_token=access_token)
-	# 		social_obj.save()
-	# 		return Response(status=status.HTTP_200_OK)
-	# 	except ObjectDoesNotExist:
-	# 		social_obj = SocialLogin.objects.create(provider=provider,name=name,client_id=client_id,
-	# 				refresh_token=refresh_token, access_token=access_token)
-	# 		return Response('user details created',status=status.HTTP_200_OK)
 
 class Facebooklogin(APIView):
 

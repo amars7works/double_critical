@@ -142,7 +142,6 @@ class UgcCommentLike(APIView):
 		game = Game.objects.get(id=request.data.get('game', None))
 		ugc_comment_likes = UGCCommentLike.objects.filter(ugc=ugc, 
 										ugc_comment=ugc_comment, game=game)
-		# response = [ugc_comment_like for ugc_comment_like in ugc_comment_likes.values()]
 		response = []
 		for ugc_comment_like in ugc_comment_likes.values():
 			if ugc_comment_like['created_at']:
