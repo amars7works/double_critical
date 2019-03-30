@@ -22,7 +22,6 @@ class GameCorrection(APIView):
 
 class GameRating(APIView):
 	def get(self, request, format="json"):
-		# user = self.request.user.id
 		# user = User.objects.get(id=request.GET.get('user', None))
 		user = self.request.user
 		print (user, '=======================')
@@ -254,6 +253,20 @@ class TrendingGames(APIView):
 		return JsonResponse(games, safe=False)
 
 class LikeGames(APIView):
+	def get(self,request,format="json"):
+		user = User.objects.get(id=request.data.get('user', None))
+		like_game_qs = LikeGame.objects.filter(user=user,
+								game_like='like')
+		games = []
+		for obj in like_game_qs:
+			games.append(obj.game.id)
+
+		game_qs = Game.objects.filter(id__in=games)
+		response = [game_obj for game_obj in game_qs.values()]
+
+		return JsonResponse(response, safe=False)
+
+
 	def post(self,request,format="json"):
 		user = User.objects.get(id=request.data.get('user', None))
 		game = Game.objects.get(id=request.data.get('game', None))
