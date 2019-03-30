@@ -241,7 +241,7 @@ class CreateGame(APIView):
 class TrendingGames(APIView):
 	def get(self,request,format="json"):
 		game_qs = Game.objects.extra(
-					select={"count": 'like_count - dislike_count'}).order_by("count", "name")
+					select={"count": 'like_count - dislike_count'}).order_by("-count", "name")
 
 		games = [game for game in game_qs.values()]
 

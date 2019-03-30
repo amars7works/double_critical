@@ -11,7 +11,7 @@ class FollowGameAdmin(admin.ModelAdmin):
 	list_display = ('user','game','created_at',)
 
 class RateGameAdmin(admin.ModelAdmin):
-	list_display = ('user','game','created_at',)
+	list_display = ('user','game', 'game_rating', 'created_at',)
 
 class GameCollectionAdmin(admin.ModelAdmin):
 	list_display = ('user','game','created_at',)
