@@ -23,7 +23,9 @@ class GameCorrection(APIView):
 class GameRating(APIView):
 	def get(self, request, format="json"):
 		# user = self.request.user.id
-		user = User.objects.get(id=request.GET.get('user', None))
+		# user = User.objects.get(id=request.GET.get('user', None))
+		user = self.request.user
+		print (user, '=======================')
 		game = Game.objects.get(id=request.GET.get('game', None))
 		try:
 			game_rating_obj = RateGame.objects.get(user=user, game=game)
@@ -238,7 +240,8 @@ class CreateGame(APIView):
 
 class TrendingGames(APIView):
 	def get(self,request,format="json"):
-		game_qs = Game.objects.extra(select={"count": 'like_count - dislike_count'}).order_by("-count")
+		game_qs = Game.objects.extra(
+					select={"count": 'like_count - dislike_count'}).order_by("count", "name")
 
 		games = [game for game in game_qs.values()]
 
@@ -316,62 +319,21 @@ class GameFollowingFeed(APIView):
 		for follow_game_obj in follow_game_qs:
 			follow_game.append(follow_game_obj.game.id)
 		# game_qs = Game.objects.filter(id__in=follow_game).order_by('-like_count')
-		ugc_obj = UGC.objects.filter(game__in=follow_game).latest('created_at')
+
+		ugc_obj = UGC.objects.filter(user=follower, game__in=follow_game).latest('created_at')
 		date_from = datetime.datetime.now() - datetime.timedelta(days=1)
 		if ugc_obj.created_at.date() == date_from.date() or datetime.date.today():
 			response.append(model_to_dict(ugc_obj))
-		# user_follow_qs = FollowUser.objects.filter(
-		# 					follower=follower)
-		# for user_follow_obj in user_follow_qs:
-		# 	following_users.append(user_follow_obj.following)
-		# game_collection_qs = GameCollection.objects.filter(
-		# 					user__in=following_users).order_by('-created_at')
 
-		# for game_collection in game_collection_qs:
-		# 	if game_collection.game.id not in follow_game:
-		# 		game_object = Game.objects.get(name=game_collection.game)
-		# 		response[game_object.name] = {}
-		# 		response[game_object.name].update(like_count = game_object.like_count)
-		# 		response[game_object.name].update(dislike_count = None)
-		
-# 		return JsonResponse(response)
-
-# class GameFollowingFeedList(APIView):
-# 	def get(self,request,format="json"):
-# 		follower = User.objects.get(id=request.GET.get('follower', None))
-
-# 		response = {}
-# 		follow_game = []
-
-# 		follow_game_qs = FollowGame.objects.filter(user=follower)
-# 		for follow_game_obj in follow_game_qs:
-# 			follow_game.append(follow_game_obj.game.id)
-
-# 		ugc_qs = UGC.objects.filter(game__in=follow_game).order_by('-created_at')
-# 		date_from = datetime.datetime.now() - datetime.timedelta(days=1)
-# 		for ugc_obj in ugc_qs:
-# 			print (ugc_obj.game.name, '+++++++++++++++++++')
-# 			response[ugc_obj.game.name]={}
-# 			response[ugc_obj.game.name].update(like_count = ugc_obj.like_count)
-# 			response[ugc_obj.game.name].update(user = ugc_obj.user.username)
-# 			response[ugc_obj.game.name].update(ugc_title = ugc_obj.ugc_title)
-
-# 		return JsonResponse(response)
-
-# class UserFollowingFeed(APIView):
-# 	def get(self,request,format="json"):
-# 		follower = User.objects.get(id=request.GET.get('follower', None))
-# 		date_from = datetime.datetime.now() - datetime.timedelta(days=1)
-# 		response = {}
 		user_follow_qs = FollowUser.objects.filter(follower=follower)
 		following_users = []
 		for user_follow_obj in user_follow_qs:
 			following_users.append(user_follow_obj.following)
 
 		ugc = UGC.objects.filter(user__in=following_users).latest('created_at')
-		if ugc.created_at.date() == date_from.date() or datetime.date.today():
-			response.append(model_to_dict(ugc))
-
+		if ugc_obj != ugc:
+			if ugc.created_at.date() == date_from.date() or datetime.date.today():
+				response.append(model_to_dict(ugc))
 
 		game_collection = GameCollection.objects.filter(
 							user__in=following_users).latest('created_at')
