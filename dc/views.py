@@ -51,54 +51,36 @@ class UserFollow(APIView):
 class HotorNotSwipe(APIView):
 	def get(self,request,format="json"):
 		user = User.objects.get(id=request.GET.get('user', None))
-		# qs = Game.objects.filter(hotornot=True)
+		if user.is_authenticated():
+			likegames = LikeGame.objects.filter(user=user)
+
 		response = []
 		game_ids = []
 		game_category = []
 
-		# for game_obj in qs:
-		# 	game_ids.append(game_obj.id)
-		# 	game_category.append(game_obj.category)
-		# 	# response.append(model_to_dict(game_obj))
-		# print (game_ids,'------------------------------')
-		if user.is_authenticated():
-			likegames = LikeGame.objects.filter(user=user)
 		if not likegames:
 			game_qs = Game.objects.filter(hotornot=True)
 			games = [game for game in game_qs.values()]
 			response = games
-			print (response, 'responseeeeeeeeeeeeeeeeeeeee')
 		else:
 			for likegame in likegames:
-				# if likegame.game_id not in game_ids:
 				game_ids.append(likegame.game.id)
 				game_category.append(likegame.game.category)
-			# 		game = Game.objects.get(id=likegame.game_id)
-					# response.append(model_to_dict(likegame))
-			print (game_ids, 'ppppppppppppppppp')
+				# game = Game.objects.get(id=likegame.game_id)
+				# response.append(model_to_dict(likegame))
 
 			game_objs = Game.objects.filter(category__in=game_category, hotornot=True)
 			for game_object in game_objs:
 				if game_object.id not in game_ids:
 					game_ids.append(game_object.id)
 					response.append(model_to_dict(game_object))
-			print (game_ids,'********************************')
 
 			game_collection = GameCollection.objects.filter(user=user, game__hotornot=True)
 			for game_coll in game_collection:
 				gameobj = Game.objects.get(name=game_coll.game)
 				if gameobj.id not in game_ids:
-					# game_ids.append(gameobj.id)
+					game_ids.append(gameobj.id)
 					response.append(model_to_dict(gameobj))
-			print (game_ids,'//////////////////////////////')
-
-		# qs = Game.objects.filter(id__in=game_ids)
-		# for game_obj in qs:
-		# 	if game_obj.id not in game_ids:
-		# 	# game_ids.append(game_obj.id)
-		# 	# game_category.append(game_obj.category)
-		# 		response.append(model_to_dict(game_obj))
-		# print (response,'------------------------------')
 
 		return JsonResponse(response, safe=False)
 
