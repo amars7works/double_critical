@@ -19,9 +19,6 @@ class GameCollectionAdmin(admin.ModelAdmin):
 class LikeGameAdmin(admin.ModelAdmin):
 	list_display = ('user','game','game_like','created_at',)
 
-class GameTagAdmin(admin.ModelAdmin):
-	list_display = ('game_name','tag_name')
-
 admin.site.register(Game,GameAdmin)
 admin.site.register(GameExtend,GameExtendAdmin)
 admin.site.register(FollowGame,FollowGameAdmin)
@@ -30,4 +27,3 @@ admin.site.register(GameCollection,GameCollectionAdmin)
 admin.site.register(LikeGame,LikeGameAdmin)
 admin.site.register(Tags)
 admin.site.register(GameCategory)
-admin.site.register(GameTag,GameTagAdmin)

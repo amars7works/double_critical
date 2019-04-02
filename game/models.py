@@ -1,12 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
-# from search.search import GameIndex
 
 class GameCategory(models.Model):
-	category_name = models.CharField(max_length=60, null=True)
+	category_name = models.CharField(max_length=60, primary_key=True)
 
 	def __str__(self):
 		return self.category_name
+
+class Tags(models.Model):
+	tag_name = models.CharField(max_length=30, primary_key=True)
+
+	def __str__(self):
+		return self.tag_name
 
 class Game(models.Model):
 
@@ -21,6 +26,10 @@ class Game(models.Model):
 		)
 
 	name = models.CharField(max_length=80, null=True)
+
+	category = models.ForeignKey(GameCategory, on_delete=models.CASCADE,null=True)
+	tag = models.ForeignKey(Tags, on_delete=models.CASCADE, null=True)
+
 	year_published = models.IntegerField(null=True)
 	minimum_players = models.IntegerField(null=True)
 	maximum_players = models.IntegerField(null=True)
@@ -30,7 +39,6 @@ class Game(models.Model):
 	designer = models.CharField(max_length=40, null=True)
 	artist = models.CharField(max_length=40, null=True)
 	publisher = models.CharField(max_length=60, null=True)
-	category = models.ForeignKey(GameCategory, on_delete=models.CASCADE,null=True)
 	mechanism = models.CharField(max_length=60, null=True)
 	views = models.IntegerField(default=0,blank=True,null=True)
 	like_count = models.IntegerField(default=0,blank=True,null=True)
@@ -53,30 +61,6 @@ class Game(models.Model):
 
 	def __str__(self):
 		return self.name
-	# Add indexing method to Game
-	# def indexing(self):
-	# 	obj = GameIndex(
-	# 			meta = {'id': self.id},
-	# 			name = self.name,
-	# 			year_published = self.year_published,
-	# 			minimum_players = self.minimum_players,
-	# 			maximum_players = self.maximum_players,
-	# 			mfg_suggested_ages = self.mfg_suggested_ages,
-	# 			minimum_playing_time = self.minimum_playing_time,
-	# 			maximum_playing_time = self.maximum_playing_time,
-	# 			designer = self.designer,
-	# 			artist = self.artist,
-	# 			publisher = self.publisher,
-	# 			category = self.category,
-	# 			mechanism = self.mechanism,
-	# 			views = self.views,
-	# 			like_count = self.like_count,
-	# 			game_status = self.game_status,
-	# 			upc = self.upc, hotornot = self.hotornot,
-	# 			origin = self.origin
-	# 	)
-	# 	obj.save()
-	# 	return obj.to_dict(include_meta=True)
 
 	class Meta:
 		unique_together = ('name', 'category')
@@ -168,19 +152,14 @@ class LikeGame(models.Model):
 	class Meta:
 		unique_together = ('user', 'game')
 
-class Tags(models.Model):
-	tag = models.CharField(max_length=30)
 
-	def __str__(self):
-		return self.tag
+# class GameTag(models.Model):
+# 	game_name = models.ForeignKey(Game, on_delete=models.CASCADE, 
+# 							related_name='game_name')
+# 	tag_name = models.ForeignKey(Tags, on_delete=models.CASCADE)
 
-class GameTag(models.Model):
-	game_name = models.ForeignKey(Game, on_delete=models.CASCADE, 
-							related_name='game_name')
-	tag_name = models.ForeignKey(Tags, on_delete=models.CASCADE)
+# 	def __str__(self):
+# 		return self.game_name.name
 
-	def __str__(self):
-		return self.game_name.name
-
-	class Meta:
-		unique_together = ('game_name', 'tag_name')
+# 	class Meta:
+# 		unique_together = ('game_name', 'tag_name')
