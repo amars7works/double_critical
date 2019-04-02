@@ -148,7 +148,7 @@ class Googlelogin(APIView):
 			except ObjectDoesNotExist:
 				social_login_obj = SocialLogin.objects.create(
 										user=user_obj,google_client_id=client_id,
-										id_token=id_token, access_token_expiry=access_token_expiry)
+										google_id_token=id_token, access_token_expiry=access_token_expiry)
 
 			return Response(status=status.HTTP_200_OK)
 
@@ -161,7 +161,7 @@ class Googlelogin(APIView):
 									email=email, username=username, password=password)
 			profile = Profile.objects.create(user=user,)
 			socail = SocialLogin.objects.create(user=user,google_client_id=client_id,
-										id_token=id_token, access_token_expiry=access_token_expiry)
+										google_id_token=id_token, access_token_expiry=access_token_expiry)
 
 			socail.google_access_token = access_token
 			socail.google_refresh_token = refresh_token
