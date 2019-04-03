@@ -12,7 +12,6 @@ class Country(models.Model):
 
 
 class State(models.Model):
-	country = models.ForeignKey(Country, on_delete=models.CASCADE)
 	state_name = models.CharField(max_length=20)
 
 	def __str__(self):

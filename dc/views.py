@@ -103,10 +103,10 @@ class DiscoveryModeHotorNot(APIView):
 
 class DiscoveryModeSwipe(APIView):
 	def get(self,request,format="json"):
+		# user = self.request.user
 		user = User.objects.get(id=request.GET.get('user', None))
-		if user.is_authenticated():
-			qs = LikeGame.objects.filter(user=user)
-
+		qs = LikeGame.objects.filter(user=user)
+		print (qs, '-----------------------------------')
 		response = []
 		game_ids = []
 		game_category = []
@@ -119,10 +119,10 @@ class DiscoveryModeSwipe(APIView):
 				game_ids.append(obj.game.id)
 				game_category.append(obj.game.category)
 
-			# games = Game.objects.filter(id__in=game_ids)
-			# for game_obj in games:
-			# 	game_category.append(game_obj.category)
-				# response.append(model_to_dict(game_obj))
+			games = Game.objects.filter(id__in=game_ids)
+			for game_obj in games:
+				game_category.append(game_obj.category)
+				response.append(model_to_dict(game_obj))
 
 			game_objs = Game.objects.filter(category__in=game_category)
 			for game in game_objs:

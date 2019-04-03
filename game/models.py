@@ -2,13 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class GameCategory(models.Model):
-	category_name = models.CharField(max_length=60, primary_key=True)
+	category_name = models.CharField(max_length=60)
 
 	def __str__(self):
 		return self.category_name
 
 class Tags(models.Model):
-	tag_name = models.CharField(max_length=30, primary_key=True)
+	tag_name = models.CharField(max_length=30)
 
 	def __str__(self):
 		return self.tag_name
@@ -28,7 +28,6 @@ class Game(models.Model):
 	name = models.CharField(max_length=80, null=True)
 
 	category = models.ForeignKey(GameCategory, on_delete=models.CASCADE,null=True)
-	tag = models.ForeignKey(Tags, on_delete=models.CASCADE, null=True)
 
 	year_published = models.IntegerField(null=True)
 	minimum_players = models.IntegerField(null=True)
@@ -82,7 +81,7 @@ class GameExtend(models.Model):
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 
 	def __str__(self):
-		return self.expansion
+		return self.game.name
 	
 	class Meta:
 		unique_together = ('game',)
@@ -153,13 +152,12 @@ class LikeGame(models.Model):
 		unique_together = ('user', 'game')
 
 
-# class GameTag(models.Model):
-# 	game_name = models.ForeignKey(Game, on_delete=models.CASCADE, 
-# 							related_name='game_name')
-# 	tag_name = models.ForeignKey(Tags, on_delete=models.CASCADE)
+class GameTag(models.Model):
+	game = models.ForeignKey(Game, on_delete=models.CASCADE)
+	tag = models.ForeignKey(Tags, on_delete=models.CASCADE)
 
-# 	def __str__(self):
-# 		return self.game_name.name
+	def __str__(self):
+		return self.game.name
 
-# 	class Meta:
-# 		unique_together = ('game_name', 'tag_name')
+	class Meta:
+		unique_together = ('game', 'tag')
