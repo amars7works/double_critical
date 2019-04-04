@@ -66,8 +66,8 @@ class HotorNotSwipe(APIView):
 			for likegame in likegames:
 				game_ids.append(likegame.game.id)
 				game_category.append(likegame.game.category)
-				# game = Game.objects.get(id=likegame.game_id)
-				# response.append(model_to_dict(likegame))
+				# game = Game.objects.get(id=likegame.game_id, hotornot=True)
+				# response.append(model_to_dict(game))
 
 			game_objs = Game.objects.filter(category__in=game_category, hotornot=True)
 			for game_object in game_objs:
@@ -86,6 +86,8 @@ class HotorNotSwipe(APIView):
 
 class DiscoveryModeHotorNot(APIView):
 	def get(self,request,format="json"):
+		user = self.request.user
+		user = User.objects.get(id=request.GET.get('user', None))
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
 
 		game_obj_dict = model_to_dict(game_obj)
@@ -94,8 +96,12 @@ class DiscoveryModeHotorNot(APIView):
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 			game_extend_obj_dict = model_to_dict(game_extend_obj)
 
+			game_rating_obj = RateGame.objects.get(user=user, game__name=game_obj.name)
+			game_rating_dict = model_to_dict(game_rating_obj)
+
 			response.update(game_obj_dict)
 			response.update(game_extend_obj_dict)
+			response.update(game_rating_dict)
 			return JsonResponse(response)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -106,7 +112,6 @@ class DiscoveryModeSwipe(APIView):
 		# user = self.request.user
 		user = User.objects.get(id=request.GET.get('user', None))
 		qs = LikeGame.objects.filter(user=user)
-		print (qs, '-----------------------------------')
 		response = []
 		game_ids = []
 		game_category = []

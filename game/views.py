@@ -271,18 +271,6 @@ class LikeGames(APIView):
 		user = User.objects.get(id=request.data.get('user', None))
 		game = Game.objects.get(id=request.data.get('game', None))
 		game_like = request.data.get('game_like', None)
-
-		like_game_obj = LikeGame.objects.create(user=user,
-								game=game,game_like=game_like)
-		like_game_obj.views += 1
-		like_game_obj.save
-		response = like(game_like,game)
-		return response
-
-	def put(self,request,format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
-		game = Game.objects.get(id=request.data.get('game', None))
-		game_like = request.data.get('game_like', None)
 		try:
 			like_game_obj = LikeGame.objects.get(user=user,game=game)
 			if game_like == 'dislike':
@@ -301,7 +289,13 @@ class LikeGames(APIView):
 				response = like(game_like,game)
 				return response
 		except ObjectDoesNotExist:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
+			# return Response(status=status.HTTP_400_BAD_REQUEST)
+			like_game_obj = LikeGame.objects.create(user=user,
+								game=game,game_like=game_like)
+			like_game_obj.views += 1
+			like_game_obj.save
+			response = like(game_like,game)
+			return response
 
 def like(game_like, game_obj):
 	if game_like == 'like':
