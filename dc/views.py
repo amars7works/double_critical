@@ -110,15 +110,15 @@ class DiscoveryModeHotorNot(APIView):
 
 class DiscoveryModeSwipe(APIView):
 	def get(self,request,format="json"):
-		user = User.objects.get(id=self.request.user.id)
+		user = User.objects.get(id=1)#self.request.user.id)
 		qs = LikeGame.objects.filter(user=user)
+		print (qs, 'qs')
 		response = []
 		game_ids = []
 		game_category = []
 		if not qs:
 			game_qs = Game.objects.all()
-			games = [game for game in game_qs.values()]
-			response = games
+			response = [game for game in game_qs.values()]
 		else:
 			for obj in qs:
 				game_ids.append(obj.game.id)
@@ -126,22 +126,28 @@ class DiscoveryModeSwipe(APIView):
 				game_category.append(obj.game.category.id)
 
 			games = Game.objects.filter(id__in=game_ids)
+			print (games, 'games')
 			for game_obj in games:
 				# game_category.append(obj.game.category)
 				game_category.append(game_obj.category.id)
 				response.append(model_to_dict(game_obj))
+			print (response, '1response 1')
 
 			# game_objs = Game.objects.filter(category__in=game_category)
 			game_objs = Game.objects.filter(category__id__in=game_category)
+			print (game_objs, 'game_objs')
 			for game in game_objs:
 				if game.id not in game_ids:
 					game_ids.append(game.id)
 					response.append(model_to_dict(game))
+			print (response, 'response 2')
 
 			game_collection = GameCollection.objects.filter(user=user)
+			print (game_collection, 'game_collection')
 			for game_coll in game_collection:
 				gameobj = Game.objects.get(name=game_coll.game)
 				if gameobj.id not in game_ids:
 					response.append(model_to_dict(gameobj))
+			print (response, 'response 3')
 
 		return JsonResponse(response, safe=False)
