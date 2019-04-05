@@ -85,7 +85,7 @@ class HotorNotSwipe(APIView):
 
 class DiscoveryModeHotorNot(APIView):
 	def get(self,request,format="json"):
-		user = User.objects.get(id=self.request.user.id)
+		user = User.objects.get(id=1)#self.request.user.id)
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
 
 		game_obj_dict = model_to_dict(game_obj)
@@ -122,14 +122,17 @@ class DiscoveryModeSwipe(APIView):
 		else:
 			for obj in qs:
 				game_ids.append(obj.game.id)
-				game_category.append(obj.game.category)
+				# game_category.append(obj.game.category)
+				game_category.append(obj.game.category.id)
 
 			games = Game.objects.filter(id__in=game_ids)
 			for game_obj in games:
-				game_category.append(game_obj.category)
+				# game_category.append(obj.game.category)
+				game_category.append(game_obj.category.id)
 				response.append(model_to_dict(game_obj))
 
-			game_objs = Game.objects.filter(category__in=game_category)
+			# game_objs = Game.objects.filter(category__in=game_category)
+			game_objs = Game.objects.filter(category__id__in=game_category)
 			for game in game_objs:
 				if game.id not in game_ids:
 					game_ids.append(game.id)
