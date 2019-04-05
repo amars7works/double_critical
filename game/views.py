@@ -36,16 +36,6 @@ class GameRating(APIView):
 		game = Game.objects.get(id=request.data.get('game', None))
 		game_rating = request.data.get('game_rating', None)
 
-		game_rating_obj = RateGame.objects.create(user=user, 
-							game=game,game_rating=game_rating)
-
-		return Response(status=status.HTTP_200_OK)
-
-	def put(self, request, format="json"):
-		user = User.objects.get(id=self.request.user.id)
-		game = Game.objects.get(id=request.data.get('game', None))
-		game_rating = request.data.get('game_rating', None)
-
 		try:
 			game_rating_obj = RateGame.objects.get(user=user, 
 							game=game)
@@ -59,7 +49,9 @@ class GameRating(APIView):
 			return Response(status=status.HTTP_200_OK)
 
 		except ObjectDoesNotExist:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
+			game_rating_obj = RateGame.objects.create(user=user, 
+							game=game,game_rating=game_rating)
+		return Response(status=status.HTTP_200_OK)
 
 class GameFollow(APIView):
 	def get(self, request, format="json"):

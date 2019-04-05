@@ -64,20 +64,9 @@ class Ugclikes(APIView):
 
 
 	def post(self, request, format="json"):
-		user = User.objects.get(id=self.request.user.id)
+		user = User.objects.get(id=1)#self.request.user.id)
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
 		like_type = request.data.get('like_type', None)
-
-		ugc_like_obj = UGCLike.objects.create(user=user,
-								ugc=ugc,
-								like_type=like_type)
-		return Response(status=status.HTTP_200_OK)
-
-	def put(self, request, format="json"):
-		user = User.objects.get(id=self.request.user.id)
-		ugc = UGC.objects.get(id=request.data.get('ugc', None))
-		like_type = request.data.get('like_type', None)
-
 		try:
 			ugc_like_obj = UGCLike.objects.get(
 									user=user,ugc=ugc)
@@ -86,11 +75,15 @@ class Ugclikes(APIView):
 				ugc_like_obj.created_at=datetime.datetime.now()
 				ugc_like_obj.save()
 			else:
+				ugc_like_obj.like_type = '0'
 				ugc_like_obj.created_at=datetime.datetime.now()
 				ugc_like_obj.save()
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
+			ugc_like_obj = UGCLike.objects.create(user=user,
+								ugc=ugc,
+								like_type=like_type)
+			return Response(status=status.HTTP_200_OK)
 
 class UgcComment(APIView):
 	def get(self, request, format="json"):
@@ -160,18 +153,6 @@ class UgcCommentLike(APIView):
 
 		ugc_comment_like = request.data.get('ugc_comment_like', None)
 
-		if ugc_comment_like == 'True':
-			ugc_comment_like_obj = UGCCommentLike.objects.create(user=user,
-									ugc_comment=ugc_comment, ugc=ugc, game=game)
-			return Response(status=status.HTTP_200_OK)
-		else:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
-
-	def put(self, request, format="json"):
-		user = User.objects.get(id=self.request.user.id)
-		ugc_comment = UGCComment.objects.get(id=request.data.get('ugc_comment', None))
-		ugc_comment_like = request.data.get('ugc_comment_like', None)
-
 		try:
 			ugc_comment_like_obj = UGCCommentLike.objects.get(
 										user=user,
@@ -184,7 +165,9 @@ class UgcCommentLike(APIView):
 				ugc_comment_like_obj.save()
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
+			ugc_comment_like_obj = UGCCommentLike.objects.create(user=user,
+									ugc_comment=ugc_comment, ugc=ugc, game=game)
+			return Response(status=status.HTTP_200_OK)
 
 class UGCReportView(APIView):
 	def post(self,request,format="json"):

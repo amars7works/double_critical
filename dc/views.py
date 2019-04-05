@@ -93,13 +93,16 @@ class DiscoveryModeHotorNot(APIView):
 			response = {}
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 			game_extend_obj_dict = model_to_dict(game_extend_obj)
-
-			game_rating_obj = RateGame.objects.get(user=user, game__name=game_obj.name)
-			game_rating_dict = model_to_dict(game_rating_obj)
-
 			response.update(game_obj_dict)
 			response.update(game_extend_obj_dict)
-			response.update(game_rating_dict)
+			try:
+				game_rating_obj = RateGame.objects.get(user=user, game__name=game_obj.name)
+				game_rating_dict = model_to_dict(game_rating_obj)
+
+				response.update(game_rating_dict)
+			except ObjectDoesNotExist:
+				return JsonResponse(response)
+
 			return JsonResponse(response)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)

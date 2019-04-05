@@ -24,7 +24,9 @@ class Login(APIView):
 	def post(self, request, format="json"):
 		username = request.data.get('username')
 		password = request.data.get('password')
+		print (username, password)
 		user = authenticate(request, username=username, password=password)
+		print (user, '==========================')
 		if user:
 			login(request,user)
 			return Response({"user_status":user.is_authenticated(), "user_id":user.id}, 
