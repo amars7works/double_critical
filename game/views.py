@@ -22,9 +22,7 @@ class GameCorrection(APIView):
 
 class GameRating(APIView):
 	def get(self, request, format="json"):
-		# user = User.objects.get(id=request.GET.get('user', None))
-		user = self.request.user
-		print (user, '=======================')
+		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.GET.get('game', None))
 		try:
 			game_rating_obj = RateGame.objects.get(user=user, game=game)
@@ -34,7 +32,7 @@ class GameRating(APIView):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 	def post(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.data.get('game', None))
 		game_rating = request.data.get('game_rating', None)
 
@@ -44,7 +42,7 @@ class GameRating(APIView):
 		return Response(status=status.HTTP_200_OK)
 
 	def put(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.data.get('game', None))
 		game_rating = request.data.get('game_rating', None)
 
@@ -76,7 +74,7 @@ class GameFollow(APIView):
 
 
 	def post(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.data.get('game', None))
 		follow = request.data.get('follow', None)
 
@@ -87,7 +85,7 @@ class GameFollow(APIView):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 	def put(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.data.get('game', None))
 		follow = request.data.get('follow', None)
 
@@ -105,7 +103,7 @@ class GameFollow(APIView):
 
 class CollectingGame(APIView):
 	def get(self, request, format="json"):
-		user = User.objects.get(id=request.GET.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		game_coll_qs = GameCollection.objects.filter(user=user)
 		games_names = []
 		for game_coll in game_coll_qs:
@@ -116,7 +114,7 @@ class CollectingGame(APIView):
 		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.data.get('game', None))
 		game_collected = request.data.get('game_collected', None)
 
@@ -127,7 +125,7 @@ class CollectingGame(APIView):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 	def put(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.data.get('game', None))
 		game_collected = request.data.get('game_collected', None)
 		try:
@@ -254,7 +252,7 @@ class TrendingGames(APIView):
 
 class LikeGames(APIView):
 	def get(self,request,format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		like_game_qs = LikeGame.objects.filter(user=user,
 								game_like='like')
 		games = []
@@ -268,7 +266,7 @@ class LikeGames(APIView):
 
 
 	def post(self,request,format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.data.get('game', None))
 		game_like = request.data.get('game_like', None)
 		try:
@@ -318,7 +316,8 @@ def like(game_like, game_obj):
 
 class GameFollowingFeed(APIView):
 	def get(self,request,format="json"):
-		follower = User.objects.get(id=request.GET.get('follower', None))
+		follower = User.objects.get(id=self.request.user.id)
+
 		response = []
 		follow_game = []
 
@@ -332,7 +331,7 @@ class GameFollowingFeed(APIView):
 		if ugc_obj.created_at.date() == date_from.date() or datetime.date.today():
 			response.append(model_to_dict(ugc_obj))
 
-		user_follow_qs = FollowUser.objects.filter(follower=follower)
+		user_follow_qs = FollowUser.objects.filter(follower__id=follower)
 		following_users = []
 		for user_follow_obj in user_follow_qs:
 			following_users.append(user_follow_obj.following)
@@ -354,7 +353,7 @@ class GameFollowingFeed(APIView):
 
 class UserCommonGame(APIView):
 	def get(self,request,format="json"):
-		follower = User.objects.get(id=request.GET.get('user', None))
+		follower = User.objects.get(id=self.request.user.id)
 		following = User.objects.get(id=request.GET.get('other_user', None))
 		follower_games = FollowGame.objects.filter(user=follower)
 		following_games = FollowGame.objects.filter(user=following)

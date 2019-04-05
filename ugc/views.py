@@ -22,7 +22,7 @@ class Ugc(APIView):
 		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.GET.get('game', None))
 		ugc_title = request.data.get('ugc_title', None)
 		like_count = request.data.get('like_count', None)
@@ -33,7 +33,7 @@ class Ugc(APIView):
 		return Response(status=status.HTTP_200_OK)
 
 	def put(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.GET.get('game', None))
 		ugc_title = request.data.get('ugc_title', None)
 		like_count = request.data.get('like_count', None)
@@ -64,7 +64,7 @@ class Ugclikes(APIView):
 
 
 	def post(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
 		like_type = request.data.get('like_type', None)
 
@@ -74,7 +74,7 @@ class Ugclikes(APIView):
 		return Response(status=status.HTTP_200_OK)
 
 	def put(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
 		like_type = request.data.get('like_type', None)
 
@@ -105,7 +105,7 @@ class UgcComment(APIView):
 		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
 		game = Game.objects.get(id=request.data.get('game', None))
 		ugc_comment = request.data.get('ugc_comment', None)
@@ -116,7 +116,7 @@ class UgcComment(APIView):
 		return Response(status=status.HTTP_200_OK)
 
 	def put(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
 		game = Game.objects.get(id=request.data.get('game', None))
 		ugc_comment = request.data.get('ugc_comment', None)
@@ -152,7 +152,7 @@ class UgcCommentLike(APIView):
 
 
 	def post(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		ugc_comment = UGCComment.objects.get(id=request.data.get('ugc_comment', None))
 
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
@@ -168,7 +168,7 @@ class UgcCommentLike(APIView):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 	def put(self, request, format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		ugc_comment = UGCComment.objects.get(id=request.data.get('ugc_comment', None))
 		ugc_comment_like = request.data.get('ugc_comment_like', None)
 
@@ -188,7 +188,7 @@ class UgcCommentLike(APIView):
 
 class UGCReportView(APIView):
 	def post(self,request,format="json"):
-		user = User.objects.get(id=request.data.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
 		description = request.data.get('description', None)
 		ugc_report = UGCReport.objects.create(user=user,ugc=ugc, description=description)

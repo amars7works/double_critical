@@ -18,7 +18,7 @@ class UserFollow(APIView):
 	# 	qs = FollowUser.objects.filter(follower=follower_user)
 
 	def post(self, request, format="json"):
-		follower_user = User.objects.get(id=request.data.get('follower', None))
+		follower_user = User.objects.get(id=self.request.user.id)
 		following_user = User.objects.get(id=request.data.get('following', None))
 		
 		response = FollowUser.objects.create(
@@ -28,7 +28,7 @@ class UserFollow(APIView):
 		return Response(status=status.HTTP_200_OK)
 
 	def put(self, request, format="json"):
-		follower_user = User.objects.get(id=request.data.get('follower', None))
+		follower_user = User.objects.get(id=self.request.user.id)
 		following_user = User.objects.get(id=request.data.get('following', None))
 		follow = request.data.get('follow', None)
 		try:
@@ -50,9 +50,8 @@ class UserFollow(APIView):
 
 class HotorNotSwipe(APIView):
 	def get(self,request,format="json"):
-		user = User.objects.get(id=request.GET.get('user', None))
-		if user.is_authenticated():
-			likegames = LikeGame.objects.filter(user=user)
+		user = User.objects.get(id=self.request.user.id)
+		likegames = LikeGame.objects.filter(user=user)
 
 		response = []
 		game_ids = []
@@ -86,8 +85,7 @@ class HotorNotSwipe(APIView):
 
 class DiscoveryModeHotorNot(APIView):
 	def get(self,request,format="json"):
-		user = self.request.user
-		user = User.objects.get(id=request.GET.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
 
 		game_obj_dict = model_to_dict(game_obj)
@@ -109,8 +107,7 @@ class DiscoveryModeHotorNot(APIView):
 
 class DiscoveryModeSwipe(APIView):
 	def get(self,request,format="json"):
-		# user = self.request.user
-		user = User.objects.get(id=request.GET.get('user', None))
+		user = User.objects.get(id=self.request.user.id)
 		qs = LikeGame.objects.filter(user=user)
 		response = []
 		game_ids = []

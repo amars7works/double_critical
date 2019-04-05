@@ -16,8 +16,7 @@ class Search(APIView):
 		ids = []
 		for game in game_qs.values():
 			ids.append(game['id'])
-		# games = [game for game in game_qs.values()]
-		# print (type(games), '===============================')
+
 		vector_1 = SearchVector('tag__tag_name', weight='B')
 		# game_tags = GameTag.objects.annotate(search=vector_1).filter(search=query)
 		game_tags = GameTag.objects.annotate(rank=SearchRank(
@@ -27,5 +26,5 @@ class Search(APIView):
 				ids.append(game_tag.game.id)
 
 		games = [gameobj for gameobj in Game.objects.filter(id__in=ids).values()]
-		# print (type(tag_games), '-------------------------------')
+
 		return JsonResponse(games, safe=False)
