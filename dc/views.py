@@ -131,7 +131,7 @@ class DiscoveryModeSwipe(APIView):
 			for game_obj in games:
 				print (game_obj.category.id)
 				## game_category.append(obj.game.category)
-				game_category.append(game_obj.category.id)
+				# game_category.append(game_obj.category.id)
 				response.append(model_to_dict(game_obj))
 			print (response, '1response 1')
 
