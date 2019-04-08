@@ -1,5 +1,6 @@
 import datetime
 import json
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -347,18 +348,12 @@ class UserCommonGame(APIView):
 	def get(self,request,format="json"):
 		follower = User.objects.get(id=self.request.user.id)
 		following = User.objects.get(id=request.GET.get('other_user', None))
-		follower_games = FollowGame.objects.filter(user=follower)
-		following_games = FollowGame.objects.filter(user=following)
+		follow_games = FollowGame.objects.filter(
+					Q(user=follower) | Q(user=following)
+				)
+		followgames = list(set(follow_game.game.name for follow_game in follow_games))
 
-		followergames = []
-		followinggames = []
-		for follower_game in follower_games:
-			game = Game.objects.get(name=follower_game.game)
-			followergames.append(model_to_dict(game))
+		games = Game.objects.filter(name__in=followgames)
+		response = [game for game in games.values()]
 
-		for following_game in following_games:
-			game_obj = Game.objects.get(name=following_game.game)
-			followinggames.append(model_to_dict(game_obj))
-
-		response = [i for i in followergames for j in followinggames if i['id']==j['id']]
 		return JsonResponse(response, safe=False)
