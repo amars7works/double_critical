@@ -64,7 +64,7 @@ class Ugclikes(APIView):
 
 
 	def post(self, request, format="json"):
-		user = User.objects.get(id=1)#self.request.user.id)
+		user = User.objects.get(id=self.request.user.id)
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
 		like_type = request.data.get('like_type', None)
 		try:
