@@ -15,9 +15,13 @@ class Ugc(APIView):
 	def get(self, request, format="json"):
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
 		ugc_obj = UGC.objects.filter(game__name=game_obj.name).latest('created_at')
-		# ugc_comments = UGCComment.objects.filter(ugc__ugc_title=ugc_obj.ugc_title)
-		# response = [ugc_comment for ugc_comment in ugc_comments.values()]
-		response = model_to_dict(ugc_obj)
+		ugc_comments = UGCComment.objects.filter(ugc__ugc_title=ugc_obj.ugc_title,
+								game__name=game_obj.name).count()
+		response = {}
+		response['ugc_title']=ugc_obj.ugc_title
+		response['user']=ugc_obj.user.username
+		response['comments_count']=ugc_comments
+		# response = model_to_dict(ugc_obj)
 
 		return JsonResponse(response, safe=False)
 
