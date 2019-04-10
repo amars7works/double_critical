@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 class Ugc(APIView):
 	def get(self, request, format="json"):
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
-		ugc_qs = UGC.objects.filter(game__name=game_obj.name)
+		ugc_qs = UGC.objects.filter(game__name=game_obj.name).order_by('-created_at')
 
 		response = []
 		for ugc_obj in ugc_qs:
