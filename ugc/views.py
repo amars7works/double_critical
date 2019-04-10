@@ -14,13 +14,17 @@ from django.contrib.auth.models import User
 class Ugc(APIView):
 	def get(self, request, format="json"):
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
-		ugc_obj = UGC.objects.filter(game__name=game_obj.name).latest('created_at')
-		ugc_comments = UGCComment.objects.filter(ugc__ugc_title=ugc_obj.ugc_title,
-								game__name=game_obj.name).count()
-		response = {}
-		response['ugc_title']=ugc_obj.ugc_title
-		response['user']=ugc_obj.user.username
-		response['comments_count']=ugc_comments
+		ugc_qs = UGC.objects.filter(game__name=game_obj.name)
+
+		response = []
+		for ugc_obj in ugc_qs:
+			ugc = {}
+			ugc_comments = UGCComment.objects.filter(ugc__ugc_title=ugc_obj.ugc_title,
+											game__name=game_obj.name).count()
+			ugc['ugc_title']=ugc_obj.ugc_title
+			ugc['user']=ugc_obj.user.username
+			ugc['comments_count']=ugc_comments
+			response.append(ugc)
 		# response = model_to_dict(ugc_obj)
 
 		return JsonResponse(response, safe=False)

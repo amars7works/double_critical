@@ -110,17 +110,6 @@ class CollectingGame(APIView):
 		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.data.get('game', None))
 		game_collected = request.data.get('game_collected', None)
-
-		if game_collected == 'True':
-			game_collection_obj = GameCollection.objects.create(user=user,game=game)
-			return Response(status=status.HTTP_200_OK)
-		else:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
-
-	def put(self, request, format="json"):
-		user = User.objects.get(id=self.request.user.id)
-		game = Game.objects.get(id=request.data.get('game', None))
-		game_collected = request.data.get('game_collected', None)
 		try:
 			game_collection_obj = GameCollection.objects.get(user=user,game=game)
 			if game_collected == 'False':
@@ -131,7 +120,9 @@ class CollectingGame(APIView):
 				game_collection_obj.save()
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
+			if game_collected == 'True':
+				game_collection_obj = GameCollection.objects.create(user=user,game=game)
+				return Response(status=status.HTTP_200_OK)
 
 class CreateGame(APIView):
 	def get(self, request, format="json"):
