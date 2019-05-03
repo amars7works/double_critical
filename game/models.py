@@ -59,7 +59,7 @@ class Game(models.Model):
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 
 	def __str__(self):
-		return self.name
+		return self.category.category_name
 
 	class Meta:
 		unique_together = ('name', 'category')
