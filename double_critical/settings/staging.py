@@ -8,15 +8,17 @@ SECRET_KEY = 'staging'
 
 ALLOWED_HOSTS =  ['*']
 
+SECRET_KEY = '4rq1*w#u!4ew5f-d7+xa#x4ne12*clbw7921csz#0u8wa_yvm$'
+
 DATABASES = {
-	'default': {
-		'ENGINE': 'django.db.backends.postgresql_psycopg2',
-		'NAME': 'HELLO_DJANGO',
-		'USER': 'U_HELLO',
-		'PASSWORD': 'hA8(scA@!fg3*sc&xaGh&6%-l<._&xCf',
-		'HOST': '127.0.0.1',
-		'PORT': 5432 # default postgres port
-	}
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'double_critical',
+        'USER': 'double-critical',
+        'PASSWORD': 'dc123456',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+     }
 }
 
 #config('ALLOWED_HOSTS', cast=Csv())
