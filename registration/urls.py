@@ -9,5 +9,6 @@ urlpatterns = [
 	url(r'api/users/login/$',views.Login.as_view(), name='login'),
 	url(r'api/users/logout/$',views.Logout.as_view(), name='logout'),
 	url(r'api/user/auth/status/$', views.user_authentication_status, name='user_authentication_status'), 
-	url(r'api/users/social/login/$',views.Sociallogin.as_view(), name='social-login'),
+	url(r'api/users/google/login/$',views.Googlelogin.as_view(), name='google-login'),
+	url(r'api/users/facebook/login/$',views.Facebooklogin.as_view(), name='facebook-login'),
 ]

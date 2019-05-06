@@ -2,10 +2,16 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class GameCategory(models.Model):
-	category_name = models.CharField(max_length=60, null=True)
+	category_name = models.CharField(max_length=60)
 
 	def __str__(self):
 		return self.category_name
+
+class Tags(models.Model):
+	tag_name = models.CharField(max_length=30)
+
+	def __str__(self):
+		return self.tag_name
 
 class Game(models.Model):
 
@@ -20,6 +26,9 @@ class Game(models.Model):
 		)
 
 	name = models.CharField(max_length=80, null=True)
+
+	category = models.ForeignKey(GameCategory, on_delete=models.CASCADE,null=True)
+
 	year_published = models.IntegerField(null=True)
 	minimum_players = models.IntegerField(null=True)
 	maximum_players = models.IntegerField(null=True)
@@ -29,10 +38,10 @@ class Game(models.Model):
 	designer = models.CharField(max_length=40, null=True)
 	artist = models.CharField(max_length=40, null=True)
 	publisher = models.CharField(max_length=60, null=True)
-	category = models.ForeignKey(GameCategory, on_delete=models.CASCADE,null=True)
 	mechanism = models.CharField(max_length=60, null=True)
-	views = models.IntegerField(blank=True,null=True)
-	like_count = models.IntegerField(blank=True,null=True)
+	views = models.IntegerField(default=0,blank=True,null=True)
+	like_count = models.IntegerField(default=0,blank=True,null=True)
+	dislike_count = models.IntegerField(default=0,blank=True,null=True)
 	game_status = models.CharField(
 				choices = STATUS_CHOICES,
 				default='review',
@@ -50,8 +59,8 @@ class Game(models.Model):
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 
 	def __str__(self):
-		return self.name
-	
+		return self.category.category_name
+
 	class Meta:
 		unique_together = ('name', 'category')
 
@@ -72,7 +81,7 @@ class GameExtend(models.Model):
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 
 	def __str__(self):
-		return self.expansion
+		return self.game.name
 	
 	class Meta:
 		unique_together = ('game',)
@@ -128,7 +137,7 @@ class LikeGame(models.Model):
 		)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
-	views = models.IntegerField(blank=True,null=True)
+	views = models.IntegerField(blank=True,null=True, default=0)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 	game_like = models.CharField(
 				max_length=10,
@@ -142,19 +151,13 @@ class LikeGame(models.Model):
 	class Meta:
 		unique_together = ('user', 'game')
 
-class Tags(models.Model):
-	tag = models.CharField(max_length=30)
-
-	def __str__(self):
-		return self.tag
 
 class GameTag(models.Model):
-	game_name = models.ForeignKey(Game, on_delete=models.CASCADE, 
-							related_name='game_name')
-	tag_name = models.ForeignKey(Tags, on_delete=models.CASCADE)
+	game = models.ForeignKey(Game, on_delete=models.CASCADE)
+	tag = models.ForeignKey(Tags, on_delete=models.CASCADE)
 
 	def __str__(self):
-		return self.game_name.name
+		return self.game.name
 
 	class Meta:
-		unique_together = ('game_name', 'tag_name')
+		unique_together = ('game', 'tag')

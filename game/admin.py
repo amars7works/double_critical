@@ -11,16 +11,13 @@ class FollowGameAdmin(admin.ModelAdmin):
 	list_display = ('user','game','created_at',)
 
 class RateGameAdmin(admin.ModelAdmin):
-	list_display = ('user','game','created_at',)
+	list_display = ('user','game', 'game_rating', 'created_at',)
 
 class GameCollectionAdmin(admin.ModelAdmin):
 	list_display = ('user','game','created_at',)
 
 class LikeGameAdmin(admin.ModelAdmin):
-	list_display = ('user','game','created_at',)
-
-class GameTagAdmin(admin.ModelAdmin):
-	list_display = ('game_name','tag_name')
+	list_display = ('user','game','game_like','created_at',)
 
 admin.site.register(Game,GameAdmin)
 admin.site.register(GameExtend,GameExtendAdmin)
@@ -30,4 +27,4 @@ admin.site.register(GameCollection,GameCollectionAdmin)
 admin.site.register(LikeGame,LikeGameAdmin)
 admin.site.register(Tags)
 admin.site.register(GameCategory)
-admin.site.register(GameTag,GameTagAdmin)
+admin.site.register(GameTag)

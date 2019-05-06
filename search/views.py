@@ -1,31 +1,30 @@
-from django.http import JsonResponse, HttpResponse
-from rest_framework.response import Response
+from django.http import JsonResponse
 from rest_framework.views import APIView
-from rest_framework import status
 
 from game.models import *
-
+from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 
 class Search(APIView):
 	def get(self, request, format="json"):
-		data = request.GET.get('data', None)
-		game_name_qs = Game.objects.filter(name=data).order_by('name')
-		print (game_name_qs, '-----------------------')
-		game_category_qs = Game.objects.filter(category__category_name=data).order_by('name')
-		print (game_category_qs, '//////////////////////////')
-		game_tag_qs = GameTag.objects.filter(tag_name__tag=data).order_by('tag_name')
-		print (game_tag_qs, '=============================')
+		text = request.GET.get('text', None)
+		vector = SearchVector('name', weight='D') + SearchVector('category__category_name', weight='B')
+		query = SearchQuery(text)
+		game_qs = Game.objects.annotate(rank=SearchRank(
+						vector, query)).filter(rank__gte=0.02).order_by('rank')
+		# game_qs = Game.objects.annotate(search=vector).filter(search=query)
 
+		ids = []
+		for game in game_qs.values():
+			ids.append(game['id'])
 
-		qs = game_name_qs.union(game_category_qs)
+		vector_1 = SearchVector('tag__tag_name', weight='B')
+		# game_tags = GameTag.objects.annotate(search=vector_1).filter(search=query)
+		game_tags = GameTag.objects.annotate(rank=SearchRank(
+						vector_1, query)).filter(rank__gte=0.02).order_by('rank')
+		for game_tag in game_tags:
+			if game_tag.game.id not in ids:
+				ids.append(game_tag.game.id)
 
-		game_ids = []
-		for obj in game_name_qs:
-			game_ids.append(obj.id)
+		games = [gameobj for gameobj in Game.objects.filter(id__in=ids).values()]
 
-		objs = {}
-
-		for obj in game_name_qs:
-			objs.update(obj)
-
-		return Response(status=status.HTTP_200_OK)
+		return JsonResponse(games, safe=False)
