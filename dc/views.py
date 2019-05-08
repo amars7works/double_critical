@@ -123,25 +123,29 @@ class DiscoveryModeSwipe(APIView):
 
 		response = []
 		game_ids = []
-		game_category = []
+		game_category = {}
 		if not qs:
 			game_qs = Game.objects.filter(game_status="published")
 			response = [game for game in game_qs.values()]
 		else:
 			for obj in qs:
 				game_ids.append(obj.game.id)
-				game_category.append(obj.game.category)
-				game_category.append(obj.game.category.id)
+				# game_category.append(obj.game.category)
+				# game_category.append(obj.game.category.id)
 
 			games = Game.objects.filter(id__in=game_ids)
 			for game_obj in games:
+				game_obj_dict = model_to_dict(game_obj)
 				# game_category.append(game_obj.category)
-				response.append(model_to_dict(game_obj))
-			game_objs = Game.objects.filter(category__in=game_category)
-			for game in game_objs:
-				if game.id not in game_ids:
-					game_ids.append(game.id)
-					response.append(model_to_dict(game))
+				for cat in list(game_obj_dict['category']):
+					game_category[cat.id]=cat.category_name
+				game_obj_dict['category']= game_category
+				response.append(game_obj_dict)
+			# game_objs = Game.objects.filter(category__in=game_category)
+			# for game in game_objs:
+			# 	if game.id not in game_ids:
+			# 		game_ids.append(game.id)
+			# 		response.append(model_to_dict(game))
 			game_collection = GameCollection.objects.filter(user=user)
 			for game_coll in game_collection:
 				gameobj = Game.objects.get(name=game_coll)
