@@ -7,6 +7,9 @@ class GameCategory(models.Model):
 	def __str__(self):
 		return self.category_name
 
+	class Meta:
+		unique_together = ('category_name',)
+
 class Tags(models.Model):
 	tag_name = models.CharField(max_length=30)
 
@@ -27,7 +30,7 @@ class Game(models.Model):
 
 	name = models.CharField(max_length=80, null=True)
 
-	category = models.ForeignKey(GameCategory, on_delete=models.CASCADE,null=True)
+	category = models.ManyToManyField(GameCategory)
 
 	year_published = models.IntegerField(null=True)
 	minimum_players = models.IntegerField(null=True)
@@ -59,10 +62,10 @@ class Game(models.Model):
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 
 	def __str__(self):
-		return self.category.category_name
+		return self.name
 
 	class Meta:
-		unique_together = ('name', 'category')
+		unique_together = ('name', )
 
 class GameExtend(models.Model):
 	game = models.OneToOneField(Game, on_delete=models.CASCADE,null=True)
