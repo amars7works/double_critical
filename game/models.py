@@ -57,6 +57,8 @@ class Game(models.Model):
 
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 	updated_at = models.DateTimeField(auto_now=True, null=True)
+	data = models.TextField(null=True, blank=True)
+	scan_type = models.TextField(null=True, blank=True)
 
 	def __str__(self):
 		return self.category.category_name

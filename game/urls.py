@@ -14,4 +14,5 @@ urlpatterns = [
 	# url(r'api/game/following/feed/list/$',views.GameFollowingFeedList.as_view(), name='game-following-feed-list'),
 	# url(r'api/user/following/feed/$',views.UserFollowingFeed.as_view(), name='user-following-feed'),
 	url(r'api/game/common/$',views.UserCommonGame.as_view(), name='common-games'),
+	url(r'api/game/barcode/$',views.BarCode.as_view(), name='barcode-game'),
 ]

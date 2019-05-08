@@ -351,3 +351,25 @@ class UserCommonGame(APIView):
 		response = [game for game in games.values()]
 
 		return JsonResponse(response, safe=False)
+
+class BarCode(APIView):
+	def get(self,request,format="json"):
+		# print("uuuuuuuuuuuuuuu")
+		# user = User.objects.get(id=self.request.user.id)
+		# print(user,"jjjjjjjjjjjjjjjjjj")
+		data = Game.objects.get(id=request.data.get('Scanner_data', None))
+		# print(data,"datadatadatdatdatdatdata")
+
+		scan_type = Game.objects.get(id=request.data.get('Scanner_type', None))
+		# print(scan_type,"typetypetype")
+
+		game_new = Game.objects.filter(data=data, scan_type=scan_type)
+		# barcode_obj = GameCollection.objects.filter(user=user, game=game_new)
+
+		# print(barcode,"barcode_obj")
+		# barcode = barcode_obj.id
+
+		# barcode_qs = Game.objects.filter(id__in=barcode)
+		# response = [bc_obj for bc_obj in barcode_qs.values()]
+
+		return JsonResponse(game_new.__dict__, safe=False)
