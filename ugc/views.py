@@ -24,6 +24,7 @@ class Ugc(APIView):
 			ugc['ugc_title']=ugc_obj.ugc_title
 			ugc['user']=ugc_obj.user.username
 			ugc['comments_count']=ugc_comments
+			ugc['ugc_id']=ugc_obj.id
 			response.append(ugc)
 		# response = model_to_dict(ugc_obj)
 
