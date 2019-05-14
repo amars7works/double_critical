@@ -61,7 +61,7 @@ class Game(models.Model):
 	scan_type = models.TextField(null=True, blank=True)
 
 	def __str__(self):
-		return self.category.category_name
+		return self.name
 
 	class Meta:
 		unique_together = ('name', 'category')

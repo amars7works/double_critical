@@ -4,7 +4,6 @@ from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics
 from rest_framework import status
 from django.core import serializers
 from game.models import *
@@ -357,18 +356,17 @@ class BarCode(APIView):
 		querset = self.get_queryset()
 
 	def get_queryset(self):
-		scan_data = self.request.query_params.get('data', None)
-		scan_type = self.request.query_params.get('type', None)
+		scan_data = self.request.query_params.get('Scanner_data', None)
+		scan_type = self.request.query_params.get('Scanner_type', None)
 
 		if scan_data and scan_type:
 			querysets = Game.objects.filter(data=scan_data, scan_type=scan_type).values()
-			queryset = GameCollection.objects.filter(user=self.request.user, game=querysets).values()
-		else:
-			queryset = []
-		return queryset
-		if queryset:
-			return Response(queryset, status=status.HTTP_200_OK)
-		else:
-			return Response({"error": "Game not found"}, status=status.HTTP_404_NOT_FOUND)
+			return Response(querysets, status=status.HTTP_200_OK)
 			
+		if querysets:
+			queryset = GameCollection.objects.filter(user=self.request.user, game=querysets).values()
+			return Response({"Game is already their in your game collection"},status=status.HTTP_200_OK)
+		else:
+			return Response({"error": "If you want to add this game in game collection?"}, status=status.HTTP_404_NOT_FOUND)
+		
 
