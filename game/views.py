@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework import status
 from django.core import serializers
 from game.models import *
@@ -13,7 +14,6 @@ from rest_framework.decorators import api_view
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
-
 
 class GameCorrection(APIView):
 
@@ -354,22 +354,21 @@ class UserCommonGame(APIView):
 
 class BarCode(APIView):
 	def get(self,request,format="json"):
-		# print("uuuuuuuuuuuuuuu")
-		# user = User.objects.get(id=self.request.user.id)
-		# print(user,"jjjjjjjjjjjjjjjjjj")
-		data = Game.objects.get(id=request.data.get('Scanner_data', None))
-		# print(data,"datadatadatdatdatdatdata")
+		querset = self.get_queryset()
 
-		scan_type = Game.objects.get(id=request.data.get('Scanner_type', None))
-		# print(scan_type,"typetypetype")
+	def get_queryset(self):
+		scan_data = self.request.query_params.get('data', None)
+		scan_type = self.request.query_params.get('type', None)
 
-		game_new = Game.objects.filter(data=data, scan_type=scan_type)
-		# barcode_obj = GameCollection.objects.filter(user=user, game=game_new)
+		if scan_data and scan_type:
+			querysets = Game.objects.filter(data=scan_data, scan_type=scan_type).values()
+			queryset = GameCollection.objects.filter(user=self.request.user, game=querysets).values()
+		else:
+			queryset = []
+		return queryset
+		if queryset:
+			return Response(queryset, status=status.HTTP_200_OK)
+		else:
+			return Response({"error": "Game not found"}, status=status.HTTP_404_NOT_FOUND)
+			
 
-		# print(barcode,"barcode_obj")
-		# barcode = barcode_obj.id
-
-		# barcode_qs = Game.objects.filter(id__in=barcode)
-		# response = [bc_obj for bc_obj in barcode_qs.values()]
-
-		return JsonResponse(game_new.__dict__, safe=False)
