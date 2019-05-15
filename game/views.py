@@ -170,6 +170,8 @@ class CreateGame(APIView):
 		family = request.data.get('family', None)
 		video_game_adaptation = request.data.get('video_game_adaptation', None)
 		note_to_admin = request.data.get('note_to_admin', None)
+		data = request.data.get('data', None)
+		scan_type = request.data.get('scan_type', None)
 
 		category = GameCategory.objects.get(category_name=request.data.get('category', None))
 
@@ -183,7 +185,8 @@ class CreateGame(APIView):
 					game_status=game_status,
 					hotornot=hotornot,
 					upc=upc,
-					origin=origin)
+					origin=origin,
+					data=data,scan_type=scan_type)
 
 		game_extend_obj = GameExtend.objects.create(game=game_obj,expansion=expansion,
 					expands=expands,integrates_with=integrates_with,contains=contains,
@@ -354,24 +357,19 @@ class UserCommonGame(APIView):
 class BarCode(APIView):
 	def get(self,request,format="json"):
 		scan_data = self.request.query_params.get('Scanner_data', None)
-		scan_type = self.request.query_params.get('Scanner_type', None)
-
-		result = []
-		if scan_data and scan_type:
-			querysets = Game.objects.filter(data=scan_data, 
-											scan_type=scan_type).values()
-			result.append(querysets)
-			if querysets:
-				queryset = GameCollection.objects.filter(user=self.request.user, 
-											game=querysets).values()
-				if queryset:
-					result.append({"status":"Game is already their in your game collection"})
-				else:
-					result.append({"status": "If you want to add this game in game collection?"})
-				return JsonResponse(result, status=status.HTTP_200_OK)
-			else:
-				return JsonResponse({"error": "Game not found"}, status=status.HTTP_404_NOT_FOUND)
-		else:
-			return JsonResponse({"error":"Barcode not found"},status = status.HTTP_404_NOT_FOUND)
 	
-
+		if scan_data:
+			games = Game.objects.filter(data=scan_data).values()
+			if games:
+				game_collections = GameCollection.objects.filter(user=request.user, 
+											game__id=games[0]['id']).values()
+				if game_collections:
+					games[0]['collection'] = True
+				else:
+					games[0]['collection'] = False
+				return JsonResponse(games[0], safe=False)
+			else:
+				return JsonResponse({"error": "game_not_found"}, status=status.HTTP_404_NOT_FOUND)
+		else:
+			return JsonResponse({"error":"missing_arguments"},status=status.HTTP_400_BAD_REQUEST )
+	
