@@ -353,20 +353,25 @@ class UserCommonGame(APIView):
 
 class BarCode(APIView):
 	def get(self,request,format="json"):
-		querset = self.get_queryset()
-
-	def get_queryset(self):
 		scan_data = self.request.query_params.get('Scanner_data', None)
 		scan_type = self.request.query_params.get('Scanner_type', None)
 
+		result = []
 		if scan_data and scan_type:
-			querysets = Game.objects.filter(data=scan_data, scan_type=scan_type).values()
-			return Response(querysets, status=status.HTTP_200_OK)
-			
-		if querysets:
-			queryset = GameCollection.objects.filter(user=self.request.user, game=querysets).values()
-			return Response({"Game is already their in your game collection"},status=status.HTTP_200_OK)
+			querysets = Game.objects.filter(data=scan_data, 
+											scan_type=scan_type).values()
+			result.append(querysets)
+			if querysets:
+				queryset = GameCollection.objects.filter(user=self.request.user, 
+											game=querysets).values()
+				if queryset:
+					result.append({"Game is already their in your game collection"})
+				else:
+					result.append({"error": "If you want to add this game in game collection?"})
+				return Response(result, status=status.HTTP_200_OK)
+			else:
+				return Response({"error": "Game not found"}, status=status.HTTP_404_NOT_FOUND)
 		else:
-			return Response({"error": "If you want to add this game in game collection?"}, status=status.HTTP_404_NOT_FOUND)
-		
+			return Response({"error":"Barcode not found"},status = status.HTTP_404_NOT_FOUND)
+	
 
