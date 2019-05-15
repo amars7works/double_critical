@@ -14,7 +14,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 
-
 class GameCorrection(APIView):
 
 	def post(self, request, format="json"):
@@ -175,6 +174,8 @@ class CreateGame(APIView):
 		family = request.data.get('family', None)
 		video_game_adaptation = request.data.get('video_game_adaptation', None)
 		note_to_admin = request.data.get('note_to_admin', None)
+		data = request.data.get('data', None)
+		scan_type = request.data.get('scan_type', None)
 
 		category = GameCategory.objects.get(category_name=request.data.get('category', None))
 
@@ -188,7 +189,8 @@ class CreateGame(APIView):
 					game_status=game_status,
 					hotornot=hotornot,
 					upc=upc,
-					origin=origin)
+					origin=origin,
+					data=data,scan_type=scan_type)
 
 		game_extend_obj = GameExtend.objects.create(game=game_obj,expansion=expansion,
 					expands=expands,integrates_with=integrates_with,contains=contains,
@@ -355,3 +357,23 @@ class UserCommonGame(APIView):
 		response = [game for game in games.values()]
 
 		return JsonResponse(response, safe=False)
+
+class BarCode(APIView):
+	def get(self,request,format="json"):
+		scan_data = self.request.query_params.get('Scanner_data', None)
+	
+		if scan_data:
+			games = Game.objects.filter(data=scan_data).values()
+			if games:
+				game_collections = GameCollection.objects.filter(user=request.user, 
+											game__id=games[0]['id']).values()
+				if game_collections:
+					games[0]['collection'] = True
+				else:
+					games[0]['collection'] = False
+				return JsonResponse(games[0], safe=False)
+			else:
+				return JsonResponse({"error": "game_not_found"}, status=status.HTTP_404_NOT_FOUND)
+		else:
+			return JsonResponse({"error":"missing_arguments"},status=status.HTTP_400_BAD_REQUEST )
+	
