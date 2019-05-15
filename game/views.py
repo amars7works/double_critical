@@ -365,13 +365,13 @@ class BarCode(APIView):
 				queryset = GameCollection.objects.filter(user=self.request.user, 
 											game=querysets).values()
 				if queryset:
-					result.append({"Game is already their in your game collection"})
+					result.append({"status":"Game is already their in your game collection"})
 				else:
-					result.append({"error": "If you want to add this game in game collection?"})
-				return Response(result, status=status.HTTP_200_OK)
+					result.append({"status": "If you want to add this game in game collection?"})
+				return JsonResponse(result, status=status.HTTP_200_OK)
 			else:
-				return Response({"error": "Game not found"}, status=status.HTTP_404_NOT_FOUND)
+				return JsonResponse({"error": "Game not found"}, status=status.HTTP_404_NOT_FOUND)
 		else:
-			return Response({"error":"Barcode not found"},status = status.HTTP_404_NOT_FOUND)
+			return JsonResponse({"error":"Barcode not found"},status = status.HTTP_404_NOT_FOUND)
 	
 
