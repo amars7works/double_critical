@@ -14,7 +14,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 
-
 class GameCorrection(APIView):
 
 	def post(self, request, format="json"):
@@ -355,3 +354,23 @@ class UserCommonGame(APIView):
 		response = [game for game in games.values()]
 
 		return JsonResponse(response, safe=False)
+
+class BarCode(APIView):
+	def get(self,request,format="json"):
+		querset = self.get_queryset()
+
+	def get_queryset(self):
+		scan_data = self.request.query_params.get('Scanner_data', None)
+		scan_type = self.request.query_params.get('Scanner_type', None)
+
+		if scan_data and scan_type:
+			querysets = Game.objects.filter(data=scan_data, scan_type=scan_type).values()
+			return Response(querysets, status=status.HTTP_200_OK)
+			
+		if querysets:
+			queryset = GameCollection.objects.filter(user=self.request.user, game=querysets).values()
+			return Response({"Game is already their in your game collection"},status=status.HTTP_200_OK)
+		else:
+			return Response({"error": "If you want to add this game in game collection?"}, status=status.HTTP_404_NOT_FOUND)
+		
+
