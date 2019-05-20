@@ -133,7 +133,7 @@ class DiscoveryModeSwipe(APIView):
 				# game_category.append(obj.game.category)
 				# game_category.append(obj.game.category.id)
 
-			games = Game.objects.filter(id__in=game_ids)
+			games = Game.objects.filter(game_status="published").exclude(id__in=game_ids)
 			for game_obj in games:
 				game_obj_dict = model_to_dict(game_obj)
 				# game_category.append(game_obj.category)
@@ -146,9 +146,9 @@ class DiscoveryModeSwipe(APIView):
 			# 	if game.id not in game_ids:
 			# 		game_ids.append(game.id)
 			# 		response.append(model_to_dict(game))
-			game_collection = GameCollection.objects.filter(user=user)
-			for game_coll in game_collection:
-				gameobj = Game.objects.get(name=game_coll)
-				if gameobj.id not in game_ids:
-					response.append(model_to_dict(gameobj))
+			# game_collection = GameCollection.objects.filter(user=user)
+			# for game_coll in game_collection:
+			# 	gameobj = Game.objects.get(name=game_coll)
+			# 	if gameobj.id not in game_ids:
+			# 		response.append(model_to_dict(gameobj))
 		return JsonResponse(response, safe=False)
