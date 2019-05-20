@@ -52,7 +52,7 @@ class Game(models.Model):
 				)
 	hotornot = models.BooleanField(default=False)
 	upc = models.CharField(max_length=20)
-	origin = models.CharField(
+	origin = models.CharField(	
 				choices=ORIGIN_CHOICES,
 				default='publisher',
 				max_length=10
@@ -60,14 +60,14 @@ class Game(models.Model):
 
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 	updated_at = models.DateTimeField(auto_now=True, null=True)
-	data = models.TextField(null=True, blank=True)
-	scan_type = models.TextField(null=True, blank=True)
+	data = models.CharField(null=True, blank=True,max_length=60)
+	scan_type = models.CharField(null=True, blank=True,max_length=60)
 
 	def __str__(self):
 		return self.name
 
-	# class Meta:
-	# 	unique_together = ('name', )
+	class Meta:
+		unique_together = ('name', )
 
 class GameExtend(models.Model):
 	game = models.OneToOneField(Game, on_delete=models.CASCADE,null=True)
