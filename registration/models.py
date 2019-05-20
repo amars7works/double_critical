@@ -19,19 +19,20 @@ class State(models.Model):
 
 
 class Profile(models.Model):
+	GENDER_CHOICE = (
+        ("Male", "Male"),
+        ("Female", "Female"),
+        ("Other", "Other")
+    )
+
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	date_of_birth = models.DateField(blank=True, null=True)
-
+	gender = models.CharField(default="Male", max_length=10, choices=GENDER_CHOICE)
 	state = models.CharField(max_length=5)
-
 	provinence = models.CharField(max_length=25, blank=True, null=True)
-
 	country = models.CharField(max_length=5)
-
 	otp = models.CharField(max_length=4, blank=True, null=True)
-
 	terms_conditions = models.BooleanField(default=False)
-
 	newsletter = models.BooleanField(default=False)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 	updated_at = models.DateTimeField(auto_now=True, null=True)
