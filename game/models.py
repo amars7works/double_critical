@@ -66,8 +66,8 @@ class Game(models.Model):
 	def __str__(self):
 		return self.name
 
-	class Meta:
-		unique_together = ('name', )
+	# class Meta:
+	# 	unique_together = ('name', )
 
 class GameExtend(models.Model):
 	game = models.OneToOneField(Game, on_delete=models.CASCADE,null=True)
