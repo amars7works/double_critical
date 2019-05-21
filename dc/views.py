@@ -124,6 +124,7 @@ class DiscoveryModeSwipe(APIView):
 		response = []
 		game_ids = []
 		game_category = {}
+		category_ids = []
 		if not qs:
 			game_qs = Game.objects.filter(game_status="published")
 			response = [game for game in game_qs.values()]
@@ -139,9 +140,10 @@ class DiscoveryModeSwipe(APIView):
 				# game_category.append(game_obj.category)
 				for cat in list(game_obj_dict['category']):
 					game_category[cat.id]=cat.category_name
+					category_ids.append(cat.id)
 				game_obj_dict['category']= game_category
 				response.append(game_obj_dict)
-				category_qs = GameCategory.objects.filter(id__in=list(game_category.keys()))
+			category_qs = GameCategory.objects.filter(id__in=set(category_ids))
 			game_objs = Game.objects.filter(game_status="published",category__in=list(category_qs))
 			for game in game_objs:
 				if game.id not in game_ids:
