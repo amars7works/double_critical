@@ -55,7 +55,7 @@ class GameRating(APIView):
 
 class GameFollow(APIView):
 	def get(self, request, format="json"):
-		game = Game.objects.get(id=request.data.get('game', None))
+		game = Game.objects.get(id=request.GET.get('game', None))
 		game_follow_qs = FollowGame.objects.filter(game=game)
 		response = []
 		for game_follow_obj in game_follow_qs.values():

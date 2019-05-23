@@ -55,7 +55,8 @@ class HotorNotSwipe(APIView):
 
 		response = []
 		game_ids = []
-		game_category = []
+		game_category = {}
+		category_ids = []
 
 		if not likegames:
 			game_qs = Game.objects.filter(hotornot=True,game_status="published")
@@ -64,22 +65,40 @@ class HotorNotSwipe(APIView):
 		else:
 			for likegame in likegames:
 				game_ids.append(likegame.game.id)
-				game_category.append(likegame.game.category)
+				# game_category.append(likegame.game.category)
+				# print(likegame.game.category)
 				# game = Game.objects.get(id=likegame.game_id, hotornot=True)
 				# response.append(model_to_dict(game))
-
-			game_objs = Game.objects.filter(category__in=game_category, hotornot=True)
+			games = Game.objects.filter(game_status="published", id__in=game_ids)
+			for game_obj in games:
+				game_obj_dict = model_to_dict(game_obj)
+				# game_category.append(game_obj.category)
+				for cat in list(game_obj_dict['category']):
+					game_category[cat.id]=cat.category_name
+					category_ids.append(cat.id)
+				# game_obj_dict['category']= game_category
+				# response.append(game_obj_dict)
+			category_qs = GameCategory.objects.filter(id__in=set(category_ids))
+			game_objs = Game.objects.filter(category__in=list(category_qs), hotornot=True)
 			for game_object in game_objs:
 				if game_object.id not in game_ids:
 					game_ids.append(game_object.id)
-					response.append(model_to_dict(game_object))
+					game_object_dict = model_to_dict(game_object)
+					for cat in list(game_obj_dict['category']):
+						game_category[cat.id]=cat.category_name
+					game_object_dict['category']= game_category
+					response.append(game_object_dict)
 
 			game_collection = GameCollection.objects.filter(user=user, game__hotornot=True)
 			for game_coll in game_collection:
 				gameobj = Game.objects.get(name=game_coll.game)
 				if gameobj.id not in game_ids:
 					game_ids.append(gameobj.id)
-					response.append(model_to_dict(gameobj))
+					gameobj_dict=model_to_dict(gameobj)
+					for cat in list(gameobj_dict['category']):
+						game_category[cat.id]=cat.category_name
+					gameobj_dict['category']= game_category
+					response.append(gameobj_dict)
 
 		return JsonResponse(response, safe=False)
 
