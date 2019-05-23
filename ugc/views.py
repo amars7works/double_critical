@@ -63,10 +63,9 @@ class Ugc(APIView):
 
 class Ugclikes(APIView):
 	def get(self, request, format="json"):
-		ugc = UGC.objects.get(id=request.data.get('ugc', None))
-
+		ugc = UGC.objects.get(id=request.GET.get('ugc', None))
 		ugc_likes = UGCLike.objects.filter(ugc=ugc,
-								like_type='LIKE')
+								like_type='+1')
 		response = [ugc_like for ugc_like in ugc_likes.values()]
 
 		return JsonResponse(response, safe=False)
