@@ -324,23 +324,23 @@ class GameFollowingFeed(APIView):
 		if ugc_obj.created_at.date() == date_from.date() or datetime.date.today():
 			response.append(model_to_dict(ugc_obj))
 
-		user_follow_qs = FollowUser.objects.filter(follower__id=follower)
+		user_follow_qs = FollowUser.objects.filter(follower__id=follower.id)
 		following_users = []
 		for user_follow_obj in user_follow_qs:
 			following_users.append(user_follow_obj.following)
+		if following_users:
+			ugc = UGC.objects.filter(user__in=following_users).latest('created_at')
+			if ugc_obj != ugc:
+				if ugc.created_at.date() == date_from.date() or datetime.date.today():
+					response.append(model_to_dict(ugc))
 
-		ugc = UGC.objects.filter(user__in=following_users).latest('created_at')
-		if ugc_obj != ugc:
-			if ugc.created_at.date() == date_from.date() or datetime.date.today():
-				response.append(model_to_dict(ugc))
+			game_collection = GameCollection.objects.filter(
+								user__in=following_users).latest('created_at')
 
-		game_collection = GameCollection.objects.filter(
-							user__in=following_users).latest('created_at')
-
-		if game_collection.created_at.date() == date_from.date() or datetime.date.today():
-			# if game_collection.game.id not in follow_game:
-			game_object = Game.objects.get(name=game_collection.game)
-			response.append(model_to_dict(game_object))
+			if game_collection.created_at.date() == date_from.date() or datetime.date.today():
+				# if game_collection.game.id not in follow_game:
+				game_object = Game.objects.get(name=game_collection.game)
+				response.append(model_to_dict(game_object))
 
 		return JsonResponse(response, safe=False)
 
