@@ -139,11 +139,11 @@ class UgcComment(APIView):
 
 class UgcCommentLike(APIView):
 	def get(self, request, format="json"):
-		ugc_comment = UGCComment.objects.get(id=request.data.get('ugc_comment', None))
-		ugc = UGC.objects.get(id=request.data.get('ugc', None))
-		game = Game.objects.get(id=request.data.get('game', None))
+		ugc_comment = UGCComment.objects.get(id=request.GET.get('ugc_comment', None))
+		ugc = UGC.objects.get(id=request.GET.get('ugc', None))
+		game = Game.objects.get(id=request.GET.get('game', None))
 		ugc_comment_likes = UGCCommentLike.objects.filter(ugc=ugc, 
-										ugc_comment=ugc_comment, game=game)
+										ugccomment=ugc_comment, game=game)
 		response = []
 		for ugc_comment_like in ugc_comment_likes.values():
 			if ugc_comment_like['created_at']:
@@ -155,7 +155,6 @@ class UgcCommentLike(APIView):
 	def post(self, request, format="json"):
 		user = User.objects.get(id=self.request.user.id)
 		ugc_comment = UGCComment.objects.get(id=request.data.get('ugc_comment', None))
-
 		ugc = UGC.objects.get(id=request.data.get('ugc', None))
 		game = Game.objects.get(id=request.data.get('game', None))
 
@@ -164,7 +163,7 @@ class UgcCommentLike(APIView):
 		try:
 			ugc_comment_like_obj = UGCCommentLike.objects.get(
 										user=user,
-										ugc_comment=ugc_comment)
+										ugccomment=ugc_comment)
 			if ugc_comment_like == 'False':
 				ugc_comment_like_obj.created_at=None
 				ugc_comment_like_obj.save()
@@ -174,7 +173,7 @@ class UgcCommentLike(APIView):
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			ugc_comment_like_obj = UGCCommentLike.objects.create(user=user,
-									ugc_comment=ugc_comment, ugc=ugc, game=game)
+									ugccomment=ugc_comment, ugc=ugc, game=game)
 			return Response(status=status.HTTP_200_OK)
 
 class UGCReportView(APIView):
