@@ -123,6 +123,15 @@ class CollectingGame(APIView):
 				game_collection_obj = GameCollection.objects.create(user=user,game=game)
 				return Response(status=status.HTTP_200_OK)
 
+	def delete(self, request, format="json"):
+		user = User.objects.get(id=self.request.user.id)
+		game = Game.objects.get(id=request.data.get('game', None))
+		files = GameCollection.objects.filter(user=user, game=game)
+		if files:
+			for file in files:
+				file.delete()
+		return Response(status=status.HTTP_200_OK)
+
 class CreateGame(APIView):
 	def get(self, request, format="json"):
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
@@ -361,7 +370,6 @@ class UserCommonGame(APIView):
 class BarCode(APIView):
 	def get(self,request,format="json"):
 		scan_data = self.request.query_params.get('Scanner_data', None)
-	
 		if scan_data:
 			games = Game.objects.filter(data=scan_data).values()
 			if games:
