@@ -159,8 +159,8 @@ class CreateGame(APIView):
 		mechanism = request.data.get('mechanism', None)
 		views = request.data.get('views', None)
 		like_count = request.data.get('like_count', None)
-		game_status = request.data.get('game_status', None) if request.data.get('game_status', None) else "review"
-		hotornot = request.data.get('hotornot', None) if request.data.get('hotornot', None) else False
+		game_status ="review"
+		hotornot = False
 		upc = request.data.get('upc', None) 
 		origin = request.data.get('origin', None) if request.data.get('origin', None) else "publisher"
 
