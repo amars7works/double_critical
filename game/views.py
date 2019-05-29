@@ -112,25 +112,13 @@ class CollectingGame(APIView):
 		try:
 			game_collection_obj = GameCollection.objects.get(user=user,game=game)
 			if game_collected == 'False':
-				game_collection_obj.created_at=None
-				game_collection_obj.save()
-			else:
-				game_collection_obj.created_at=datetime.datetime.now()
-				game_collection_obj.save()
+				game_collection_obj.delete()			
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			if game_collected == 'True':
 				game_collection_obj = GameCollection.objects.create(user=user,game=game)
 				return Response(status=status.HTTP_200_OK)
 
-	def delete(self, request, format="json"):
-		user = User.objects.get(id=self.request.user.id)
-		game = Game.objects.get(id=request.data.get('game', None))
-		files = GameCollection.objects.filter(user=user, game=game)
-		if files:
-			for file in files:
-				file.delete()
-		return Response(status=status.HTTP_200_OK)
 
 class CreateGame(APIView):
 	def get(self, request, format="json"):
@@ -139,9 +127,27 @@ class CreateGame(APIView):
 		try:
 			response = {}
 			categories = {}
+			artistss = {}
+			publishers = {}
+			designers = {}
+			mechanisms = {}
+		
 			for cat in list(game_obj_dict['category']):
 				categories[cat.id]=cat.category_name
 			game_obj_dict['category'] = categories
+			for artists in list(game_obj_dict['artist']):
+				artistss[artists.id]=artists.artist_name
+			game_obj_dict['artist'] = artistss
+			for pub in list(game_obj_dict['publisher']):
+				publishers['pub.id']=pub.publisher_name
+			game_obj_dict['publisher'] = publishers
+			for design in list(game_obj_dict['designer']):
+				designers[design.id] = design.designer_name
+			game_obj_dict['designer'] = designers
+			for mecha in list(game_obj_dict['mechanism']):
+				mechanisms[mecha.id] = mecha.mechanism
+			game_obj_dict['mechanism'] = mechanisms
+
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 			game_extend_obj_dict = model_to_dict(game_extend_obj)
 			# category = GameCategory.objects.get(category_name=game_obj.category)
@@ -162,14 +168,10 @@ class CreateGame(APIView):
 		mfg_suggested_ages = request.data.get('mfg_suggested_ages', None)
 		minimum_playing_time = request.data.get('minimum_playing_time', None)
 		maximum_playing_time = request.data.get('maximum_playing_time', None)
-		# designer = request.data.get('designer', None)
-		designer = Designer.objects.get(designer_name=request.data.get('designer', None))
-		# artist = request.data.get('artist', None)
-		artist = Artist.objects.get(artist_name=request.data.get('artist',None))
-		# publisher = request.data.get('publisher', None)
-		publisher = Publisher.objects.get(publisher_name=requqest.data.get('publisher',None))
-		# mechanism = request.data.get('mechanism', None)
-		mechanism = Mechanism.objects.get(mechanism=request.data.get('mechanism',None))	
+		designer = request.data.get('designer', None)
+		artist = request.data.get('artist', None)
+		publisher = request.data.get('publisher', None)
+		mechanism = request.data.get('mechanism', None)
 		views = request.data.get('views', None)
 		like_count = request.data.get('like_count', None)
 		game_status = request.data.get('game_status', None)

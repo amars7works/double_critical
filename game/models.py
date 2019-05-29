@@ -45,6 +45,7 @@ class Mechanism(models.Model):
 
 	class Meta:
 		unique_together = ('mechanism',)
+
 class Tags(models.Model):
 	tag_name = models.CharField(max_length=30)
 
@@ -92,7 +93,7 @@ class Game(models.Model):
 				default='publisher',
 				max_length=10
 				)
-
+	description = models.CharField(max_length=250,blank=True,null=True)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 	data = models.CharField(null=True, blank=True,max_length=60)
