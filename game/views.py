@@ -168,10 +168,10 @@ class CreateGame(APIView):
 		mechanism = request.data.get('mechanism', None)
 		views = request.data.get('views', None)
 		like_count = request.data.get('like_count', None)
-		game_status = request.data.get('game_status', None)
-		hotornot = request.data.get('hotornot', None)
-		upc = request.data.get('upc', None)
-		origin = request.data.get('origin', None)
+		game_status ="review"
+		hotornot = False
+		upc = request.data.get('upc', None) 
+		origin = request.data.get('origin', None) if request.data.get('origin', None) else "publisher"
 
 		expansion = request.data.get('expansion', None)
 		expands = request.data.get('expands', None)
@@ -186,20 +186,23 @@ class CreateGame(APIView):
 		data = request.data.get('data', None)
 		scan_type = request.data.get('scan_type', None)
 
-		category = GameCategory.objects.get(category_name=request.data.get('category', None))
+		category = GameCategory.objects.filter(category_name__in=request.data.get('category', None))
 
-		game_obj = Game.objects.create(name=name,year_published=year_published,
+		game_obj = Game(name=name,year_published=year_published,
 					minimum_players=minimum_players,maximum_players=maximum_players,
 					mfg_suggested_ages=mfg_suggested_ages,
 					minimum_playing_time=minimum_playing_time,
 					maximum_playing_time=maximum_playing_time,designer=designer,
-					artist=artist,publisher=publisher,category=category,
+					artist=artist,publisher=publisher,
 					mechanism=mechanism,views=views,like_count=like_count,
 					game_status=game_status,
 					hotornot=hotornot,
 					upc=upc,
 					origin=origin,
 					data=data,scan_type=scan_type)
+		game_obj.save()
+		for cat in category:
+			game_obj.category.add(cat)
 
 		game_extend_obj = GameExtend.objects.create(game=game_obj,expansion=expansion,
 					expands=expands,integrates_with=integrates_with,contains=contains,
