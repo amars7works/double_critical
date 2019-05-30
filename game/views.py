@@ -123,15 +123,6 @@ class CollectingGame(APIView):
 				game_collection_obj = GameCollection.objects.create(user=user,game=game)
 				return Response(status=status.HTTP_200_OK)
 
-	def delete(self, request, format="json"):
-		user = User.objects.get(id=self.request.user.id)
-		game = Game.objects.get(id=request.data.get('game', None))
-		files = GameCollection.objects.filter(user=user, game=game)
-		if files:
-			for file in files:
-				file.delete()
-		return Response(status=status.HTTP_200_OK)
-
 class CreateGame(APIView):
 	def get(self, request, format="json"):
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
@@ -186,7 +177,6 @@ class CreateGame(APIView):
 		data = request.data.get('data', None)
 		scan_type = request.data.get('scan_type', None)
 
-		category = GameCategory.objects.filter(category_name__in=request.data.get('category', None))
 
 		game_obj = Game(name=name,year_published=year_published,
 					minimum_players=minimum_players,maximum_players=maximum_players,
@@ -201,8 +191,17 @@ class CreateGame(APIView):
 					origin=origin,
 					data=data,scan_type=scan_type)
 		game_obj.save()
-		for cat in category:
-			game_obj.category.add(cat)
+		cat_list = request.data.get('category', [])
+		category = []
+		for cat in cat_list:
+			try:
+				item = GameCategory.objects.get(category_name=cat)
+				category.append(item)
+			except ObjectDoesNotExist:
+				item = GameCategory.objects.create(category_name=cat,status="review")
+				category.append(item)
+		for cat_item in category:
+			game_obj.category.add(cat_item)
 
 		game_extend_obj = GameExtend.objects.create(game=game_obj,expansion=expansion,
 					expands=expands,integrates_with=integrates_with,contains=contains,
@@ -212,33 +211,6 @@ class CreateGame(APIView):
 
 		return Response(status=status.HTTP_201_CREATED)
 
-	# def put(self, request, format="json"):
-	# 	name = request.data.get('name', None)
-	# 	try:
-	# 		game_obj = Game.objects.get(name=name)
-	# 		game_obj.__dict__.update(**request.data)
-	# 		game_obj.updated_at = datetime.datetime.now()
-	# 		game_obj.save()
-	# 		return Response(status=status.HTTP_200_OK)
-	# 	except ObjectDoesNotExist:
-	# 		return Response(status=status.HTTP_400_BAD_REQUEST)
-
-# class GameExtension(APIView):
-# 	def post(self, request, format="json"):
-# 		game_data = Game.objects.get(id=request.data.pop('game'))
-# 		game_extend_obj = GameExtend.objects.create(game=game_data,**request.data)
-# 		return Response(status=status.HTTP_200_OK)
-
-# 	def put(self, request, format="json"):
-# 		game_data = Game.objects.get(id=request.data.pop('game'))
-# 		try:
-# 			game_extend_obj = GameExtend.objects.get(game=game_data)
-# 			game_extend_obj.__dict__.update(**request.data)
-# 			game_extend_obj.updated_at = datetime.datetime.now()
-# 			game_extend_obj.save()
-# 			return Response(status=status.HTTP_200_OK)
-# 		except ObjectDoesNotExist:
-# 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class TrendingGames(APIView):
 	def get(self,request,format="json"):
@@ -373,6 +345,7 @@ class UserCommonGame(APIView):
 class BarCode(APIView):
 	def get(self,request,format="json"):
 		scan_data = self.request.query_params.get('Scanner_data', None)
+	
 		if scan_data:
 			games = Game.objects.filter(data=scan_data).values()
 			if games:
