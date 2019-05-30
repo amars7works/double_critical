@@ -2,7 +2,16 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class GameCategory(models.Model):
+	STATUS_CHOICES = (
+		('review','REVIEW'),
+		('published','PUBLISHED')
+		)
 	category_name = models.CharField(max_length=60)
+	status = models.CharField(
+				choices = STATUS_CHOICES,
+				default='review',
+				max_length = 10
+				)
 
 	def __str__(self):
 		return self.category_name
