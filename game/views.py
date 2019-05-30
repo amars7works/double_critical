@@ -96,29 +96,35 @@ class GameFollow(APIView):
 class CollectingGame(APIView):
 	def get(self, request, format="json"):
 		user = User.objects.get(id=self.request.user.id)
-		game_coll_qs = GameCollection.objects.filter(user=user)
-		games_names = []
-		for game_coll in game_coll_qs:
-			games_names.append(game_coll.game)
+		game_collections = GameCollection.objects.filter(user=user)
+		game_name_list = []
+		for game_collected in game_collections:
+			if game_collected.created_at:
+				game_name_list.append(game_collected.game)
 
-		game_qs = Game.objects.filter(name__in=games_names)
-		response = [game_obj for game_obj in game_qs.values()]
+		games = Game.objects.filter(name__in= game_name_list)
+		response = [game for game in games.values()]
 		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
 		user = User.objects.get(id=self.request.user.id)
-		game = Game.objects.get(id=request.data.get('game', None))
+		game_id = Game.objects.get(id=request.data.get('game_id', None))
 		game_collected = request.data.get('add_to_collection', None)
+		response_data = { "status": "game_not_found" }
 		try:
-			game_collection_obj = GameCollection.objects.get(user=user,game=game)
-			if game_collected == False:
-				game_collection_obj.delete()
-			elif game_collected == None:
+			game_collection_obj = GameCollection.objects.get(game=game_id)
+			if not game_collected:
 				game_collection_obj.created_at = None
+				game_collection_obj.delete()
+				response_data['status'] = "removed_from_collection"
+			else:
+				game_collection_obj.created_at = datetime.datetime.now()
 				game_collection_obj.save()
+				response_data['status'] = "added_to_collection"
 		except ObjectDoesNotExist:
-			if game_collected == True:
-				game_collection_obj = GameCollection.objects.create(user=user,game=game)
+			if game_collected:
+				game_collection_obj = GameCollection.objects.create(user=user,game=game_id)
+				response_data['status'] = "added_to_collection"
 		return Response(status=status.HTTP_200_OK)
 
 
