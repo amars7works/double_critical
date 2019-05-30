@@ -19,6 +19,42 @@ class GameCategory(models.Model):
 	class Meta:
 		unique_together = ('category_name',)
 
+class Designer(models.Model):
+	designer_name = models.CharField(max_length=60)
+
+	def __str__(self):
+		return self.designer_name
+
+	class Meta:
+		unique_together = ('designer_name',)
+
+class Artist(models.Model):
+	artist_name = models.CharField(max_length=60)
+
+	def __str__(self):
+		return self.artist_name
+
+	class Meta:
+		unique_together = ('artist_name',)
+
+class Publisher(models.Model):
+	publisher_name = models.CharField(max_length=60)
+
+	def __str__(self):
+		return self.publisher_name
+
+	class Meta:
+		unique_together = ('publisher_name',)
+
+class Mechanism(models.Model):
+	mechanism = models.CharField(max_length=60)
+
+	def __str__(self):
+		return self.mechanism
+
+	class Meta:
+		unique_together = ('mechanism',)
+
 class Tags(models.Model):
 	tag_name = models.CharField(max_length=30)
 
@@ -47,10 +83,10 @@ class Game(models.Model):
 	mfg_suggested_ages = models.CharField(max_length=20, null=True)
 	minimum_playing_time = models.CharField(max_length=20, null=True)
 	maximum_playing_time = models.CharField(max_length=20, null=True)
-	designer = models.CharField(max_length=40, null=True)
-	artist = models.CharField(max_length=40, null=True)
-	publisher = models.CharField(max_length=60, null=True)
-	mechanism = models.CharField(max_length=60, null=True)
+	designer = models.ManyToManyField(Designer)
+	artist = models.ManyToManyField(Artist)
+	publisher = models.ManyToManyField(Publisher)
+	mechanism = models.ManyToManyField(Mechanism)
 	views = models.IntegerField(default=0,blank=True,null=True)
 	like_count = models.IntegerField(default=0,blank=True,null=True)
 	dislike_count = models.IntegerField(default=0,blank=True,null=True)
@@ -66,7 +102,7 @@ class Game(models.Model):
 				default='publisher',
 				max_length=10
 				)
-
+	description = models.CharField(max_length=250,blank=True,null=True)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 	updated_at = models.DateTimeField(auto_now=True, null=True)
 	data = models.CharField(null=True, blank=True,max_length=60)

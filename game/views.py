@@ -96,32 +96,37 @@ class GameFollow(APIView):
 class CollectingGame(APIView):
 	def get(self, request, format="json"):
 		user = User.objects.get(id=self.request.user.id)
-		game_coll_qs = GameCollection.objects.filter(user=user)
-		games_names = []
-		for game_coll in game_coll_qs:
-			games_names.append(game_coll.game)
+		game_collections = GameCollection.objects.filter(user=user)
+		game_name_list = []
+		for game_collected in game_collections:
+			if game_collected.created_at:
+				game_name_list.append(game_collected.game)
 
-		game_qs = Game.objects.filter(name__in=games_names)
-		response = [game_obj for game_obj in game_qs.values()]
+		games = Game.objects.filter(name__in= game_name_list)
+		response = [game for game in games.values()]
 		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
 		user = User.objects.get(id=self.request.user.id)
-		game = Game.objects.get(id=request.data.get('game', None))
-		game_collected = request.data.get('game_collected', None)
+		game_id = Game.objects.get(id=request.data.get('game_id', None))
+		game_collected = request.data.get('add_to_collection', None)
+		response_data = { "status": "game_not_found" }
 		try:
-			game_collection_obj = GameCollection.objects.get(user=user,game=game)
-			if game_collected == 'False':
-				game_collection_obj.created_at=None
-				game_collection_obj.save()
+			game_collection_obj = GameCollection.objects.get(game=game_id)
+			if not game_collected:
+				game_collection_obj.created_at = None
+				game_collection_obj.delete()
+				response_data['status'] = "removed_from_collection"
 			else:
-				game_collection_obj.created_at=datetime.datetime.now()
+				game_collection_obj.created_at = datetime.datetime.now()
 				game_collection_obj.save()
-			return Response(status=status.HTTP_200_OK)
+				response_data['status'] = "added_to_collection"
 		except ObjectDoesNotExist:
-			if game_collected == 'True':
-				game_collection_obj = GameCollection.objects.create(user=user,game=game)
-				return Response(status=status.HTTP_200_OK)
+			if game_collected:
+				game_collection_obj = GameCollection.objects.create(user=user,game=game_id)
+				response_data['status'] = "added_to_collection"
+		return Response(status=status.HTTP_200_OK)
+
 
 class CreateGame(APIView):
 	def get(self, request, format="json"):
@@ -130,9 +135,27 @@ class CreateGame(APIView):
 		try:
 			response = {}
 			categories = {}
+			artistss = {}
+			publishers = {}
+			designers = {}
+			mechanisms = {}
+		
 			for cat in list(game_obj_dict['category']):
 				categories[cat.id]=cat.category_name
 			game_obj_dict['category'] = categories
+			for artists in list(game_obj_dict['artist']):
+				artistss[artists.id]=artists.artist_name
+			game_obj_dict['artist'] = artistss
+			for pub in list(game_obj_dict['publisher']):
+				publishers['pub.id']=pub.publisher_name
+			game_obj_dict['publisher'] = publishers
+			for design in list(game_obj_dict['designer']):
+				designers[design.id] = design.designer_name
+			game_obj_dict['designer'] = designers
+			for mecha in list(game_obj_dict['mechanism']):
+				mechanisms[mecha.id] = mecha.mechanism
+			game_obj_dict['mechanism'] = mechanisms
+
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 			game_extend_obj_dict = model_to_dict(game_extend_obj)
 			# category = GameCategory.objects.get(category_name=game_obj.category)
