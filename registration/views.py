@@ -95,18 +95,25 @@ class ForgotPassword(APIView):
 
 
 class ResetPassword(APIView):
-	def post(self, request, format="json"):
+	def get(self,request, format = "json"):
 		otp = request.data.get('otp', None)
+		email = request.data.get('email', None)
+		try:
+			profile_obj = Profile.objects.get(user__email=email, otp=otp)
+			return Response(status=status.HTTP_200_OK)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+	def post(self, request, format="json"):
 		email = request.data.get('email', None)
 		password = request.data.get('password', None)
 		try:
-			profile_obj = Profile.objects.get(user__email=email, otp=otp)
-			profile_obj.__dict__.update(otp=None)
-			profile_obj.save()
-
+			profile_obj = Profile.objects.get(user__email=email)
 			user_obj = User.objects.get(email=email)
 			user_obj.set_password(password)
 			user_obj.save()
+			profile_obj.__dict__.update(otp=None)
+			profile_obj.save()
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
