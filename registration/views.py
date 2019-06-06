@@ -95,6 +95,14 @@ class ForgotPassword(APIView):
 
 
 class ResetPassword(APIView):
+	"""
+	Parameters: email, otp
+	try: Validating the user enterd otp based on the randomly generated otp
+	which was send to user email
+	Retunrn: status
+
+	"""
+
 	def get(self,request, format = "json"):
 		otp = request.data.get('otp', None)
 		email = request.data.get('email', None)
@@ -104,6 +112,12 @@ class ResetPassword(APIView):
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
+	"""
+	Parameters: email, password
+	try: password saves into database then otp will be none 
+	Retunrn: status
+	
+	"""
 	def post(self, request, format="json"):
 		email = request.data.get('email', None)
 		password = request.data.get('password', None)
