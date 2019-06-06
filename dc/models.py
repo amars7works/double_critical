@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 class FollowUser(models.Model):
 	follower = models.ForeignKey(User, null=True, related_name='follower')
 	following = models.ForeignKey(User, null=True, related_name='following')
+	follow_count = models.IntegerField(blank=True,null=True)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 	def __str__(self):
