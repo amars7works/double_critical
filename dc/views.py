@@ -13,9 +13,13 @@ from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 
 class UserFollow(APIView):
-	# def get(self,request,format="json"):
-	# 	follower_user = User.objects.get(id=request.GET.get('follower', None))
-	# 	qs = FollowUser.objects.filter(follower=follower_user)
+	def get(self,request,format="json"):
+		follower_user = User.objects.get(id=request.GET.get('follower', None))
+		qs = FollowUser.objects.filter(follower=follower_user)
+
+		response = [userfollow for userfollow in qs.values()]
+
+		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
 		follower_user = User.objects.get(id=self.request.user.id)
@@ -27,23 +31,41 @@ class UserFollow(APIView):
 
 		return Response(status=status.HTTP_200_OK)
 
+
 	def put(self, request, format="json"):
 		follower_user = User.objects.get(id=self.request.user.id)
 		following_user = User.objects.get(id=request.data.get('following', None))
 		follow = request.data.get('follow', None)
+		unfollow = request.data.get('unfollow', None)
 		try:
 			user_follow_obj = FollowUser.objects.get(
 							following=following_user,
 							follower=follower_user
 							)
+
 			if follow == 'False':
 				user_follow_obj.created_at=None
 				user_follow_obj.save()
 
 			else:
 				user_follow_obj.created_at=datetime.datetime.now()
+				count_followr = 0
+				qs = FollowUser.objects.filter(follower=follower_user)
+				for userfollows in qs.values():
+					count = userfollows.get("follow_count")
+					if count == 0 or count == None:
+						count = 1
+
+				count_followr = count_followr + count
 				user_follow_obj.save()
-			
+
+			if unfollow  == 'True':
+				user_follow_obj.created_at=None
+				user_follow_obj.delete()
+			else:
+				user_follow_obj.created_at=datetime.datetime.now()
+				user_follow_obj.save()
+
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
