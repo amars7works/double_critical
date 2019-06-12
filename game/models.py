@@ -211,3 +211,36 @@ class GameTag(models.Model):
 
 	class Meta:
 		unique_together = ('game', 'tag')
+
+
+
+class GameFeed(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	game = models.ForeignKey(Game, on_delete=models.CASCADE)
+	game_title = models.CharField(max_length=30)
+	game_comment = models.TextField(blank=True,null=True)
+	like_count = models.IntegerField(blank=True,null=True)
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+	def __str__(self):
+		return self.game_title
+
+	class Meta:
+		unique_together = ('user', 'game', 'game_title')
+
+
+class GameFeedLike(models.Model):
+	LIKE_CHOICES = (
+		('like','LIKE'),
+		('dislike','DISLIKE')
+		)
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	feed = models.ForeignKey(GameFeed, on_delete=models.CASCADE)
+	like_type = models.CharField(max_length=10,choices=LIKE_CHOICES, default='0')
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+	def __str__(self):
+		return self.user.username
+
+	class Meta:
+		unique_together = ('user', 'feed')
