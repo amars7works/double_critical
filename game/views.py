@@ -384,61 +384,66 @@ class BarCode(APIView):
 		else:
 			return JsonResponse({"error":"missing_arguments"},status=status.HTTP_400_BAD_REQUEST )
 	
+
 class GameFeeds(APIView):
 	"""
 	parameter: game
-	generating the user post details like username, title, game name,
-	game description, game id and also comment coiunt
-	return: game_dic 
+	getting the data, details like username, title, game name,
+	game description, game id and comment coiunt
+	return: game_dict 
 	"""
 	def get(self,request,format="json"):
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
-		game_feed = GameFeed.objects.filter(game__name=game_obj.name)
+		game_feed = GameFeed.objects.filter(game__name=game_obj.name).order_by('-created_at')
 
 		response = []
-		for games_obj in game_feed:
-			game_dic = {}
-			game_comments = GameFeed.objects.filter(game_title=games_obj.game_title,
-											game__name=game_obj.name,
-											game__description=game_obj.description).count()
+		for game_feed_obj in game_feed:
+			game_dict = {}
+			game_comments = GameFeed.objects.filter(game_title=game_feed_obj.game_title,
+											game__name=game_obj.name).count()
 
-			game_dic['game_title']=games_obj.game_title
-			game_dic['user']=games_obj.user.username
-			game_dic['comments_count']=game_comments
-			game_dic['game_id']=games_obj.id
-			game_dic['game_description']=game_obj.description
-			response.append(game_dic)
-		return JsonResponse(game_dic,safe=False)
+			game_dict['game_title']=game_feed_obj.game_title
+			game_dict['user']=game_feed_obj.user.username
+			game_dict['comments_count']=game_comments
+			game_dict['game_id']=game_feed_obj.id
+			game_dict['game_description']=game_feed_obj.game_description
+			game_dict['like_count']=game_feed_obj.like_count
+			response.append(game_dict)
+		return JsonResponse(game_dict,safe=False)
+
 
 	"""
-	parameters: game, game_title, like_count
-	create: game_title and game_like
+	parameters: game, game_title, game_description
+	this methods will create game_title, game_description
+	it'll return game objects
 	"""
 	def post(self, request, format="json"):
 		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.data.get('game', None))
+		game_description = request.data.get('game_description', None)
 		game_title = request.data.get('game_title', None)
-		like_count = request.data.get('like_count', None)
+		# like_count = request.data.get('like_count', None)
 
 		game_obj = GameFeed.objects.create(user=user, game=game,
 								game_title=game_title,
-								like_count=like_count)
+								game_description=game_description)
 		return Response(status=status.HTTP_200_OK)
 
 	"""
-	updating the like_count
+	this method will update the game description
 	"""
 	def put(self, request, format="json"):
 		user = User.objects.get(id=self.request.user.id)
 		game = Game.objects.get(id=request.data.get('game', None))
 		game_title = request.data.get('game_title', None)
-		like_count = request.data.get('like_count', None)
+		game_description = request.data.get('game_description', None)
+		# like_count = request.data.get('like_count', None)
 
 		try:
 			game_obj = GameFeed.objects.get(user=user,game=game,
 								game_title=game_title)
-			if game_obj.like_count != like_count:
-				game_obj.like_count = like_count
+			if game_obj.game_description != game_description:
+				game_obj.game_description = game_description
 				game_obj.created_at=datetime.datetime.now()
 				game_obj.save()
 			else:
@@ -447,153 +452,3 @@ class GameFeeds(APIView):
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-class GameComment(APIView):
-
-	"""
-	parameters: game
-	generating list of all comments of the game feed
-	"""
-	def get(self, request, format="json"):
-		# user = User.objects.get(id=self.request.user.id)
-		game = Game.objects.get(id=request.GET.get('game', None))
-		# game_title = GameFeed.objects.get(id=request.GET.get('game_title',None))
-		
-		game_comments = GameFeed.objects.filter(game__name=game.name
-								# game_title=game_title
-								).order_by('-created_at')
-		response = [game_comment for game_comment in game_comments.values()]
-
-		return JsonResponse(response, safe=False)
-
-	"""
-	parameters: game, game_comment
-	create: game_comment,user,game,game_title
-	return: status
-	"""
-
-	def post(self, request, format="json"):
-		user = User.objects.get(id=self.request.user.id)
-		game_title = GameFeed.objects.get(id=request.data.get('game_title', None))
-		game = Game.objects.get(id=request.data.get('game', None))
-		game_comment = request.data.get('game_comment', None)
-
-		ugc_comment_obj = GameFeed.objects.create(user=user,
-								game=game,
-								game_title=game_title,
-								game_comment=game_comment)
-		return Response(status=status.HTTP_200_OK)
-
-	"""
-	parameters: game_title, game,game_comment
-	updating the game comment 
-	"""
-	def put(self, request, format="json"):
-		user = User.objects.get(id=self.request.user.id)
-		game_title = GameFeed.objects.get(id=request.data.get('game_title', None))
-		game = Game.objects.get(id=request.data.get('game', None))
-		game_comment = request.data.get('game_comment', None)
-		try:
-			game_comment_obj = GameFeed.objects.get(user=user,
-									game_title=game_title,
-									game=game)
-			if game_comment_obj.game_comment!=game_comment:
-				game_comment_obj.game_comment=game_comment
-				game_comment_obj.created_at=datetime.datetime.now()
-				game_comment_obj.updated_at=datetime.datetime.now()
-				game_comment_obj.save()
-			else:
-				game_comment_obj.created_at=datetime.datetime.now()
-				game_comment_obj.updated_at=datetime.datetime.now()
-				game_comment_obj.save()
-			return Response(status=status.HTTP_200_OK)
-		except ObjectDoesNotExist:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
-
-class GameCommentLike(APIView):
-	"""
-	parameters: game_comment, game
-	"""
-	def get(self, request, format="json"):
-		game_comment = GameFeed.objects.get(id=request.GET.get('game_comment', None))
-		game = Game.objects.get(id=request.GET.get('game', None))
-		game_comment_likes = GameFeed.objects.filter(game_comment=game_comment,
-									game=game)
-		response = []
-		for game_comment_like in game_comment_likes.values():
-			if game_comment_like['created_at']:
-				response.append(game_comment_like)
-
-		return JsonResponse(response, safe=False)
-
-	"""
-	parameters:game_comment,game_title,game,game_comment_like
-	if user like or dislike the comment save the like type 
-	"""
-
-	def post(self, request, format="json"):
-		user = User.objects.get(id=self.request.user.id)
-		game_comment = GameFeed.objects.get(id=request.data.get('game_comment', None))
-		game_title = GameFeed.objects.get(id=request.data.get('game_title', None))
-		# ugc = UGC.objects.get(id=request.data.get('ugc', None))
-		game = Game.objects.get(id=request.data.get('game', None))
-
-		game_comment_like = request.data.get('game_comment_like', None)
-
-		try:
-			game_comment_like_obj = GameFeed.objects.get(
-										user=user,
-										game_comment=game_comment)
-			if game_comment_like == 'False':
-				game_comment_like_obj.created_at=None
-				game_comment_like_obj.save()
-			else:
-				game_comment_like_obj.created_at=datetime.datetime.now()
-				game_comment_like_obj.save()
-			return Response(status=status.HTTP_200_OK)
-		except ObjectDoesNotExist:
-			game_comment_like_obj = GameFeed.objects.create(game_title=game_title,
-												user=user,
-												game_comment=game_comment, 
-												game=game)
-			return Response(status=status.HTTP_200_OK)
-
-
-class GameFeedlikes(APIView):
-	"""
-	parameters: feed
-	generating the list of all like post
-	"""
-	def get(self, request, format="json"):
-		feed = GameFeed.objects.get(id=request.GET.get('feed', None))
-		post_likes = GameFeedLike.objects.filter(feed=feed,
-								like_type='+1')
-		response = [post_like for post_like in post_likes.values()]
-
-		return JsonResponse(response, safe=False)
-
-	"""
-	parameters:user, feed, like_type
-	creating a like_type for user post the feed
-	"""
-	def post(self,request,format="json"):
-		user = User.objects.get(id=self.request.user.id)
-		feed = GameFeed.objects.get(id=request.data.get('feed', None))
-		like_type = request.data.get('like_type', None)
-		try:
-			feed_like_obj = GameFeedLike.objects.get(
-									user=user,feed=feed)
-			if feed_like_obj.like_type != like_type:
-				feed_like_obj.created_at=datetime.datetime.now()
-				feed_like_obj.save()
-			else:
-				feed_like_obj.like_type = like_type
-				feed_like_obj.created_at=datetime.datetime.now()
-				feed_like_obj.save()
-			return Response(status=status.HTTP_200_OK)
-		except ObjectDoesNotExist:
-			feed_like_obj = GameFeedLike.objects.create(user=user,
-								feed=feed,
-								like_type=like_type)
-			return Response(status=status.HTTP_200_OK)
