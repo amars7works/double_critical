@@ -13,9 +13,12 @@ from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 
 class UserFollow(APIView):
-	# def get(self,request,format="json"):
-	# 	follower_user = User.objects.get(id=request.GET.get('follower', None))
-	# 	qs = FollowUser.objects.filter(follower=follower_user)
+
+	def get(self,request,format="json"):
+	 	follower_user = User.objects.get(id=request.GET.get('follower', None))
+	 	qs = FollowUser.objects.filter(follower=follower_user)
+		response = [userfollow for userfollow in qs.values()]
+		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
 		follower_user = User.objects.get(id=self.request.user.id)
