@@ -16,8 +16,5 @@ urlpatterns = [
 	url(r'api/game/common/$',views.UserCommonGame.as_view(), name='common-games'),
 	url(r'api/game/barcode/$',views.BarCode.as_view(), name='barcode-game'),
 	url(r'api/game/feed/$',views.GameFeeds.as_view(), name='feed-game'),
-	url(r'api/game/comment/$',views.GameComment.as_view(), name='comment-game'),
-	url(r'api/game/comment/like/$',views.GameCommentLike.as_view(), name='comment-like-game'),
-	url(r'api/game/feed/like/$',views.GameFeedlikes.as_view(), name='feed-like-game'),
 
 ]
