@@ -6,8 +6,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect,HttpResponse,JsonResponse
 from django.shortcuts import redirect
+import ast
 
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
@@ -16,9 +17,11 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from .models import Profile, SocialLogin
+from game.models import *
+from dc.models import FollowUser
 from .custom_signals import post_registration_notify
-from .serializers import UserProfileSerializer
-
+from .serializers import UserProfileSerializer,UserSerializer,GameCollectionSerializer
+from django.forms.models import model_to_dict
 
 class Login(APIView):
 	def post(self, request, format="json"):
@@ -205,17 +208,14 @@ class Facebooklogin(APIView):
 			data = url.read().decode()
 
 		data = json.loads(data)
-
 		email = data['email']
 		first_name = data['first_name']
 		last_name = data['last_name']
 		username = data['name']
 		client_id = data['id']
 		# access_token = data['access_token']
-
 		try:
 			user_obj = User.objects.get(email=email)
-
 			profile_obj = Profile.objects.get(user=user_obj)
 			if profile_obj:
 				profile_obj.user.first_name=first_name
@@ -246,3 +246,38 @@ class Facebooklogin(APIView):
 			socail.facebook_client_id = client_id
 			socail.save()
 			return Response(status=status.HTTP_200_OK)
+"""
+This class is for displaying the user's profile data
+"""
+class UserProfile(APIView):
+	"""
+	This function takes data from 3 diffrent models(profile, game, dc)
+	and returns required fields on API(user's profile).
+	"""
+	def get(self,request,format="json"):
+		profile  = Profile.objects.filter(user = request.user)
+		proserializer = UserSerializer(profile,many=True)
+		prodata = proserializer.data
+		for pdata in prodata:
+			user_obj = User.objects.get(id = pdata['user'])
+			pdata['username'] = user_obj.username
+
+		game = GameCollection.objects.filter(user = request.user)
+		gameserializer = GameCollectionSerializer(game,many=True)
+		gamedata = gameserializer.data
+		for gdata in gamedata:
+			gdata = gdata
+
+		dc_follower  = FollowUser.objects.filter(follower=request.user).count()
+		dc_following = FollowUser.objects.filter(follower=request.user).count()
+	
+		all_data = {}
+		all_data['username']=pdata['username']
+		all_data['id']=pdata['id']
+		all_data['state']=pdata['state']
+		all_data['country']=pdata['country']
+		all_data['game']=gdata['game']
+		all_data['follower']=dc_follower
+		all_data['following']=dc_following
+
+		return Response(alldata,status = status.HTTP_200_OK)

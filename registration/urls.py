@@ -11,4 +11,5 @@ urlpatterns = [
 	url(r'api/user/auth/status/$', views.user_authentication_status, name='user_authentication_status'), 
 	url(r'api/users/google/login/$',views.Googlelogin.as_view(), name='google-login'),
 	url(r'api/users/facebook/login/$',views.Facebooklogin.as_view(), name='facebook-login'),
+	url(r'api/users/profile/$',views.UserProfile.as_view(), name = 'user_profile'),
 ]
