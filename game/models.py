@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+from dc.models import FollowUser
+from django.forms.models import model_to_dict
+
+
 
 class GameCategory(models.Model):
 	STATUS_CHOICES = (
@@ -61,6 +65,15 @@ class Tags(models.Model):
 	def __str__(self):
 		return self.tag_name
 
+class GameGallery(models.Model):
+
+	images = models.ImageField(upload_to='upload/',null=True)
+	videos = models.FileField(upload_to='upload/',null=True)
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+	def __str__(self):
+		return self.user
+
 class Game(models.Model):
 
 	STATUS_CHOICES = (
@@ -112,7 +125,7 @@ class Game(models.Model):
 		return self.name
 
 	class Meta:
-		unique_together = ('name', )
+		unique_together = ('name',)
 
 class GameExtend(models.Model):
 	game = models.OneToOneField(Game, on_delete=models.CASCADE,null=True)
@@ -213,16 +226,63 @@ class GameTag(models.Model):
 		unique_together = ('game', 'tag')
 
 class GameFeed(models.Model):
+	object_type = models.CharField(max_length=30)
+	object_id = models.IntegerField(blank=True,null=True)
+	object_created_at = models.DateTimeField(auto_now_add=True, null=True)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
-	game_title = models.CharField(max_length=30)
-	game_comment = models.TextField(blank=True,null=True)
-	game_description = models.CharField(max_length=250)
-	like_count = models.IntegerField(blank=True,null=True)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 	def __str__(self):
-		return self.game_title
+		return self.object_type
+
+class LikeLog(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	object_id = models.IntegerField(blank=True,null=True)
+	object_type = models.CharField(max_length=30)
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+	def __str__(self):
+		return self.object_type
 
 	class Meta:
-		unique_together = ('user', 'game', 'game_title')
+		unique_together = ('object_type','object_id')
+
+
+class SocialBase(models.Model):
+	likes_count = models.IntegerField(blank=True,null=True)
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	object_type = models.CharField(max_length=30)
+
+	def __str__(self):
+		return self.object_type
+
+class GameComment(SocialBase):
+	comment = models.TextField(blank=True,null=True)
+	users = models.ForeignKey(User, on_delete=models.CASCADE)
+	game = models.ForeignKey(Game, on_delete=models.CASCADE)
+	created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+	def __str__(self):
+		return self.comment
+
+	class Meta:
+		unique_together = ('users','game')
+
+
+	def save(self, *args, **kwargs):
+	    super(SocialBase, self).save(*args, **kwargs)
+	    follow_users = FollowUser.objects.filter(follower = self.user)
+	    game_feed_item = GameFeed(user=self.user,object_type='GameComment', 
+	    				object_id = self.id,
+	    				game = self.game,
+	    				object_created_at=self.created_at)
+	    
+	    game_feed_item.save()
+	    for follow_user in follow_users:
+	    	game_feed = GameFeed(user=follow_user.follower,object_type='GameComment',
+	    					object_id = self.id,
+	    					game = self.game,
+	    					object_created_at=self.created_at)
+	    	game_feed.save()
+

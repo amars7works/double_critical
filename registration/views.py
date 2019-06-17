@@ -59,31 +59,34 @@ class UserCreate(APIView):
 				return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-def generate_otp():
-	otp = get_random_string(4, allowed_chars='0123456789')
-	return otp
+# def generate_otp():
+# 	otp = get_random_string(4, allowed_chars='0123456789')
+# 	return otp
 
 class ForgotPassword(APIView):
 	def post(self, request, format="json"):
 		email = request.data.get('email', None)
 		try:
 			profile_obj = Profile.objects.get(user__email=email)
-			otp = profile_obj.otp
-			if not otp:
-				otp = generate_otp()
-			profile_obj.__dict__.update(otp=otp)
-			profile_obj.save()
+			# otp = profile_obj.otp
+			# if not otp:
+			# 	otp = generate_otp()
+			# profile_obj.__dict__.update(otp=otp)
+			# profile_obj.save()
 			message = """
 				Hi {},
 
-				{}is One Time Password to rest your Account
+				http://localhost:8000/api/users/reset_password/
+				Click this link to reset your password.
 
+				This is a system generated email, please do not reply to this.
+				
 				Sincerely,
 				Double Critical
 				"""
-			message = message.format(profile_obj.user.username.capitalize(), otp)
+			message = message.format(profile_obj.user.username.capitalize())
 			send_mail(
-				subject="One Time Password",
+				subject="Password Rest Link",
 				message = message,
 				from_email = "dealswallet.com@gmail.com",
 				recipient_list = [email],
@@ -96,25 +99,8 @@ class ForgotPassword(APIView):
 
 class ResetPassword(APIView):
 	"""
-	Parameters: email, otp
-	try: Validating the user enterd otp based on the randomly generated otp
-	which was send to user email
-	Retunrn: status
-
-	"""
-
-	def get(self,request, format = "json"):
-		otp = request.data.get('otp', None)
-		email = request.data.get('email', None)
-		try:
-			profile_obj = Profile.objects.get(user__email=email, otp=otp)
-			return Response(status=status.HTTP_200_OK)
-		except ObjectDoesNotExist:
-			return Response(status=status.HTTP_400_BAD_REQUEST)
-
-	"""
 	Parameters: email, password
-	try: password saves into database then otp will be none 
+	try: password saves into database  
 	Retunrn: status
 	
 	"""
@@ -126,8 +112,6 @@ class ResetPassword(APIView):
 			user_obj = User.objects.get(email=email)
 			user_obj.set_password(password)
 			user_obj.save()
-			profile_obj.__dict__.update(otp=None)
-			profile_obj.save()
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
