@@ -15,9 +15,11 @@ from django.forms.models import model_to_dict
 class UserFollow(APIView):
 
 	def get(self,request,format="json"):
-	 	follower_user = User.objects.get(id=request.GET.get('follower', None))
-	 	qs = FollowUser.objects.filter(follower=follower_user)
+		follower_user = User.objects.get(id=request.GET.get('follower', None))
+		qs = FollowUser.objects.filter(follower=follower_user)
+
 		response = [userfollow for userfollow in qs.values()]
+
 		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
@@ -30,23 +32,41 @@ class UserFollow(APIView):
 
 		return Response(status=status.HTTP_200_OK)
 
+
 	def put(self, request, format="json"):
 		follower_user = User.objects.get(id=self.request.user.id)
 		following_user = User.objects.get(id=request.data.get('following', None))
 		follow = request.data.get('follow', None)
+		unfollow = request.data.get('unfollow', None)
 		try:
 			user_follow_obj = FollowUser.objects.get(
 							following=following_user,
 							follower=follower_user
 							)
+
 			if follow == 'False':
 				user_follow_obj.created_at=None
 				user_follow_obj.save()
 
 			else:
 				user_follow_obj.created_at=datetime.datetime.now()
+				count_followr = 0
+				qs = FollowUser.objects.filter(follower=follower_user)
+				for userfollows in qs.values():
+					count = userfollows.get("follow_count")
+					if count == 0 or count == None:
+						count = 1
+
+				count_followr = count_followr + count
 				user_follow_obj.save()
-			
+
+			if unfollow  == 'True':
+				user_follow_obj.created_at=None
+				user_follow_obj.delete()
+			else:
+				user_follow_obj.created_at=datetime.datetime.now()
+				user_follow_obj.save()
+
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -114,9 +134,26 @@ class DiscoveryModeHotorNot(APIView):
 		try:
 			response = {}
 			categories = {}
+			publishers = {}
+			Mechanisms = {}
+			artists = {}
+			designers ={}
 			for cat in list(game_obj_dict['category']):
 				categories[cat.id]=cat.category_name
 			game_obj_dict['category'] = categories
+			for pub in list(game_obj_dict['publisher']):
+				publishers[pub.id]=pub.publisher_name
+			game_obj_dict['publisher'] = publishers
+			for mec in list(game_obj_dict['mechanism']):
+				Mechanisms[mec.id]=mec.mechanism
+			game_obj_dict['mechanism'] = Mechanisms
+			for art in list(game_obj_dict['artist']):
+				artists[art.id]=art.artist_name
+			game_obj_dict['artist'] = artists
+			for dsg in list(game_obj_dict['designer']):
+				designers[dsg.id]=dsg.designer_name
+			game_obj_dict['designer'] = designers
+			
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 			game_extend_obj_dict = model_to_dict(game_extend_obj)
 			# category = GameCategory.objects.get(category_name=game_obj.category)
@@ -127,7 +164,6 @@ class DiscoveryModeHotorNot(APIView):
 			try:
 				game_rating_obj = RateGame.objects.get(user=user, game__name=game_obj.name)
 				game_rating_dict = model_to_dict(game_rating_obj)
-
 				response.update(game_rating_dict)
 			except ObjectDoesNotExist:
 				return JsonResponse(response)

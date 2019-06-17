@@ -85,7 +85,7 @@ class GameFollow(APIView):
 			game_follow_obj = FollowGame.objects.get(user=user,game=game)
 			if follow == 'False':
 				game_follow_obj.created_at=None
-				game_follow_obj.save()
+				game_follow_obj.delete()
 			else:
 				game_follow_obj.created_at=datetime.datetime.now()
 				game_follow_obj.save()
@@ -340,14 +340,33 @@ class GameFollowingFeed(APIView):
 			if ugc_obj != ugc:
 				if ugc.created_at.date() == date_from.date() or datetime.date.today():
 					response.append(model_to_dict(ugc))
-
 			game_collection = GameCollection.objects.filter(
 								user__in=following_users).latest('created_at')
 
 			if game_collection.created_at.date() == date_from.date() or datetime.date.today():
 				# if game_collection.game.id not in follow_game:
 				game_object = Game.objects.get(name=game_collection.game)
-				response.append(model_to_dict(game_object))
+				cat = {}
+				publishers = {}
+				Mechanisms = {}
+				artists = {}
+				designers ={}
+				response = model_to_dict(game_object)
+				for categiry in list(response['category']):
+					cat[categiry.id]=categiry.category_name
+				response['category'] = cat
+				for pub in list(response['publisher']):
+					publishers[pub.id]=pub.publisher_name
+				response['publisher'] = publishers
+				for mec in list(response['mechanism']):
+					Mechanisms[mec.id]=mec.mechanism
+				response['mechanism'] = Mechanisms
+				for art in list(response['artist']):
+					artists[art.id]=art.artist_name
+				response['artist'] = artists
+				for dsg in list(response['designer']):
+					designers[dsg.id]=dsg.designer_name
+				response['designer'] = designers
 
 		return JsonResponse(response, safe=False)
 
@@ -384,3 +403,23 @@ class BarCode(APIView):
 		else:
 			return JsonResponse({"error":"missing_arguments"},status=status.HTTP_400_BAD_REQUEST )
 	
+class incement_like_count(APIView):
+	def put(self,request,format="json"):
+		user = User.objects.get(id=self.request.user.id)
+		obj_id = LikeLog.objects.get(id=request.GET.get('object_id', None))
+		likes_count = request.data.get('likes_count', None)
+		if obj_id:
+			try:
+				social_base = SocialBase.objects.filter(user=user)
+				for social in social_base:
+					if social.likes_count == likes_count:
+						social.likes_count = likes_count
+						social.likes_count +=1
+					# social.created_at=datetime.datetime.now()
+						social.save()
+					else:
+						social.likes_count -=1
+						social.save()
+				return Response(status=status.HTTP_200_OK)
+			except ObjectDoesNotExist:
+				return Response(status=status.HTTP_400_BAD_REQUEST)

@@ -28,7 +28,7 @@ class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	date_of_birth = models.DateField(blank=True, null=True)
 	gender = models.CharField(default="Male", max_length=10, choices=GENDER_CHOICE)
-	state = models.CharField(max_length=5)
+	state = models.CharField(max_length=30)
 	provinence = models.CharField(max_length=25, blank=True, null=True)
 	country = models.CharField(max_length=5)
 	otp = models.CharField(max_length=4, blank=True, null=True)

@@ -15,4 +15,6 @@ urlpatterns = [
 	# url(r'api/user/following/feed/$',views.UserFollowingFeed.as_view(), name='user-following-feed'),
 	url(r'api/game/common/$',views.UserCommonGame.as_view(), name='common-games'),
 	url(r'api/game/barcode/$',views.BarCode.as_view(), name='barcode-game'),
+	url(r'api/game/increment/like/$',views.incement_like_count.as_view(), name='inc-like-game'),
+
 ]
