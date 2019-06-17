@@ -133,9 +133,26 @@ class DiscoveryModeHotorNot(APIView):
 		try:
 			response = {}
 			categories = {}
+			publishers = {}
+			Mechanisms = {}
+			artists = {}
+			designers ={}
 			for cat in list(game_obj_dict['category']):
 				categories[cat.id]=cat.category_name
 			game_obj_dict['category'] = categories
+			for pub in list(game_obj_dict['publisher']):
+				publishers[pub.id]=pub.publisher_name
+			game_obj_dict['publisher'] = publishers
+			for mec in list(game_obj_dict['mechanism']):
+				Mechanisms[mec.id]=mec.mechanism
+			game_obj_dict['mechanism'] = Mechanisms
+			for art in list(game_obj_dict['artist']):
+				artists[art.id]=art.artist_name
+			game_obj_dict['artist'] = artists
+			for dsg in list(game_obj_dict['designer']):
+				designers[dsg.id]=dsg.designer_name
+			game_obj_dict['designer'] = designers
+			
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 			game_extend_obj_dict = model_to_dict(game_extend_obj)
 			# category = GameCategory.objects.get(category_name=game_obj.category)
@@ -146,7 +163,6 @@ class DiscoveryModeHotorNot(APIView):
 			try:
 				game_rating_obj = RateGame.objects.get(user=user, game__name=game_obj.name)
 				game_rating_dict = model_to_dict(game_rating_obj)
-
 				response.update(game_rating_dict)
 			except ObjectDoesNotExist:
 				return JsonResponse(response)
