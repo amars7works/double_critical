@@ -269,7 +269,7 @@ class UserProfile(APIView):
 			gdata = gdata
 
 		dc_follower  = FollowUser.objects.filter(follower=request.user).count()
-		dc_following = FollowUser.objects.filter(follower=request.user).count()
+		dc_following = FollowUser.objects.filter(following=request.user).count()
 	
 		all_data = {}
 		all_data['username']=pdata['username']
@@ -280,4 +280,4 @@ class UserProfile(APIView):
 		all_data['follower']=dc_follower
 		all_data['following']=dc_following
 
-		return Response(alldata,status = status.HTTP_200_OK)
+		return Response(all_data,status = status.HTTP_200_OK)
