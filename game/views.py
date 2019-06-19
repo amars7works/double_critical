@@ -13,6 +13,7 @@ from rest_framework.decorators import api_view
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
+from django.conf import settings
 
 class GameCorrection(APIView):
 
@@ -139,6 +140,7 @@ class CreateGame(APIView):
 			publishers = {}
 			designers = {}
 			mechanisms = {}
+			card_images = {}
 		
 			for cat in list(game_obj_dict['category']):
 				categories[cat.id]=cat.category_name
@@ -155,14 +157,16 @@ class CreateGame(APIView):
 			for mecha in list(game_obj_dict['mechanism']):
 				mechanisms[mecha.id] = mecha.mechanism
 			game_obj_dict['mechanism'] = mechanisms
+			game_obj_dict['card_image'] = settings.MEDIA_ROOT+game_obj_dict['card_image'].url
+			game_obj_dict['swipe_image'] = settings.MEDIA_ROOT+game_obj_dict['swipe_image'].url
+			game_obj_dict['info_image'] = settings.MEDIA_ROOT+game_obj_dict['info_image'].url
 
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
+
 			game_extend_obj_dict = model_to_dict(game_extend_obj)
-			# category = GameCategory.objects.get(category_name=game_obj.category)
 
 			response.update(game_obj_dict)
 			response.update(game_extend_obj_dict)
-			# response['category'] = category.category_name
 
 			return JsonResponse(response)
 		except ObjectDoesNotExist:
