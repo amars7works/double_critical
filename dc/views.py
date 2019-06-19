@@ -15,21 +15,12 @@ from django.forms.models import model_to_dict
 class UserFollow(APIView):
 
 	def get(self,request,format="json"):
-		user = User.objects.get(id = request.id)
-		# follower_user = User.objects.get(follower=request.GET.get('follower', None))
-		qs = FollowUser.objects.filter(follower=user)
-		qs1 = FollowUser.objects.filter(following =user)
-		game = Game.objects.filter(game = user)
+		follower_user = User.objects.get(id=request.GET.get('follower', None))
+		qs = FollowUser.objects.filter(follower=follower_user)
 
-		collection = {}
-		collection['id'] = user
-		collection['follower'] = qs
-		collection['following'] = qs1
-		collection['game'] = game
+		response = [userfollow for userfollow in qs.values()]
 
-		# response = [userfollow for userfollow in qs.values()]
-
-		return Response(collection, status = status.HTTP_200_OK)
+		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
 		follower_user = User.objects.get(id=self.request.user.id)
@@ -137,9 +128,7 @@ class HotorNotSwipe(APIView):
 class DiscoveryModeHotorNot(APIView):
 	def get(self,request,format="json"):
 		user = User.objects.get(id=self.request.user.id)
-		print(user,"iiiddddddhhh130")
 		game_obj = Game.objects.get(id=request.GET.get('game', None))
-		print(game_obj,"gggggoooooooo132")
 
 		game_obj_dict = model_to_dict(game_obj)
 		try:
