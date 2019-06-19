@@ -4,8 +4,6 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from .models import *
-from game.models import GameCollection
-from dc.models import FollowUser
 
 class UserProfileSerializer(serializers.ModelSerializer):
 	username = serializers.CharField(source='user.username')
@@ -60,12 +58,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
 		instance.save()
 		return instance
 
-class UserSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Profile
-		fields = ('id','user','state', 'country')
-
-class GameCollectionSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = GameCollection
-		fields = ('id','game')

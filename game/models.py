@@ -103,9 +103,6 @@ class Game(models.Model):
 	views = models.IntegerField(default=0,blank=True,null=True)
 	like_count = models.IntegerField(default=0,blank=True,null=True)
 	dislike_count = models.IntegerField(default=0,blank=True,null=True)
-	card_image = models.ImageField(upload_to='uploads/',null = True)
-	swipe_image = models.ImageField(upload_to='uploads/',null = True)
-	info_image = models.ImageField(upload_to='uploads/',null = True)
 	game_status = models.CharField(
 				choices = STATUS_CHOICES,
 				default='review',
