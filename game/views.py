@@ -203,15 +203,17 @@ class CreateGame(APIView):
 		note_to_admin = request.data.get('note_to_admin', None)
 		data = request.data.get('data', None)
 		scan_type = request.data.get('scan_type', None)
-
+		card_image = request.data.get('card_image', None)
+		swipe_image = request.data.get('swipe_image', None)
+		info_image = request.data.get('info_image', None)
 
 		game_obj = Game(name=name,year_published=year_published,
 					minimum_players=minimum_players,maximum_players=maximum_players,
 					mfg_suggested_ages=mfg_suggested_ages,
 					minimum_playing_time=minimum_playing_time,
-					maximum_playing_time=maximum_playing_time,designer=designer,
-					artist=artist,publisher=publisher,
-					mechanism=mechanism,views=views,like_count=like_count,
+					maximum_playing_time=maximum_playing_time,
+					views=views,like_count=like_count,card_image=card_image,
+					swipe_image=swipe_image,info_image=info_image,
 					game_status=game_status,
 					hotornot=hotornot,
 					upc=upc,
@@ -229,6 +231,51 @@ class CreateGame(APIView):
 				category.append(item)
 		for cat_item in category:
 			game_obj.category.add(cat_item)
+
+		designer_list = request.data.get('designer',[])
+		designer = []
+		for dig in designer_list:
+			try:
+				item = Designer.objects.get(designer_name=dig)
+				designer.append(item)
+			except ObjectDoesNotExist:
+				item =Designer.objects.create(designer_name=dig)
+				designer.append(item)
+			for dig_item in designer:
+				game_obj.designer.add(dig_item)
+		artist_list = request.data.get('artist', [])
+		artist = []
+		for art in artist_list:
+			try:
+				item = Artist.objects.get(artist_name=art)
+				artist.append(item)
+			except ObjectDoesNotExist:
+				item = Artist.objects.create(artist_name=art)
+				artist.append(item)
+			for atr_item in artist:
+				game_obj.artist.add(item)
+		pub_list = request.data.get('publisher', [])
+		publisher = []
+		for pub in pub_list:
+			try:
+				item = Publisher.objects.get(publisher_name=pub)
+				publisher.append(item)
+			except ObjectDoesNotExist:
+				item = Publisher.objects.create(publisher_name=pub)
+				publisher.append(item)
+			for pub_item in publisher:
+				game_obj.publisher.add(item)
+		mecha_list = request.data.get('mechanism',)
+		mechanism = []
+		for mech in mecha_list:
+			try:
+				item = Mechanism.objects.get(mechanism = mech)
+				mechanism.append(item)
+			except ObjectDoesNotExist:
+				item = Mechanism.objects.create(mechanism = mech)
+				mechanism.append(item)
+		for mech_item in mechanism:
+			game_obj.mechanism.add(item)
 
 		game_extend_obj = GameExtend.objects.create(game=game_obj,expansion=expansion,
 					expands=expands,integrates_with=integrates_with,contains=contains,
