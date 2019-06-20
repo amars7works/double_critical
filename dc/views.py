@@ -189,6 +189,14 @@ class DiscoveryModeSwipe(APIView):
 		response = []
 		game_ids = []
 		game_category = {}
+		artistss = {}
+		publishers = {}
+		designers = {}
+		mechanisms = {}
+		artistss_ids = []
+		publishers_ids = []
+		designers_ids = []
+		mechanisms_ids = []
 		category_ids = []
 		if not qs:
 			game_qs = Game.objects.filter(game_status="published")
@@ -207,6 +215,31 @@ class DiscoveryModeSwipe(APIView):
 					game_category[cat.id]=cat.category_name
 					category_ids.append(cat.id)
 				game_obj_dict['category']= game_category
+
+				for artists in list(game_obj_dict['artist']):
+					artistss[artists.id]=artists.artist_name
+					artistss_ids.append(artists.id)
+				game_obj_dict['artist'] = artistss
+
+				for pub in list(game_obj_dict['publisher']):
+					publishers['pub.id']=pub.publisher_name
+					publishers_ids.append(pub.id)
+				game_obj_dict['publisher'] = publishers
+
+				for design in list(game_obj_dict['designer']):
+					designers[design.id] = design.designer_name
+					designers_ids.append(design.id)
+				game_obj_dict['designer'] = designers
+
+				for mecha in list(game_obj_dict['mechanism']):
+					mechanisms[mecha.id] = mecha.mechanism
+					mechanisms_ids.append(mecha.id)
+				game_obj_dict['mechanism'] = mechanisms
+
+				game_obj_dict['card_image'] = settings.MEDIA_ROOT+game_obj_dict['card_image'].url
+				game_obj_dict['swipe_image'] = settings.MEDIA_ROOT+game_obj_dict['swipe_image'].url
+				game_obj_dict['info_image'] = settings.MEDIA_ROOT+game_obj_dict['info_image'].url
+
 				response.append(game_obj_dict)
 			category_qs = GameCategory.objects.filter(id__in=set(category_ids))
 			game_objs = Game.objects.filter(game_status="published",category__in=list(category_qs)).exclude(id__in=game_ids)
@@ -216,6 +249,28 @@ class DiscoveryModeSwipe(APIView):
 				for cat in list(game_dict['category']):
 					game_category[cat.id]=cat.category_name
 				game_dict['category']= game_category
+
+				for artists in list(game_dict['artist']):
+					artistss[artists.id]=artists.artist_name
+				game_dict['artist'] = artistss
+				
+				for pub in list(game_dict['publisher']):
+					publishers['pub.id']=pub.publisher_name
+				game_dict['publisher'] = publishers
+				
+				for design in list(game_dict['designer']):
+					designers[design.id] = design.designer_name
+				game_dict['designer'] = designers
+				
+				for mecha in list(game_dict['mechanism']):
+					mechanisms[mecha.id] = mecha.mechanism
+				game_dict['mechanism'] = mechanisms
+
+				game_dict['card_image'] = settings.MEDIA_ROOT+game_dict['card_image'].url
+				game_dict['swipe_image'] = settings.MEDIA_ROOT+game_dict['swipe_image'].url
+				game_dict['info_image'] = settings.MEDIA_ROOT+game_dict['info_image'].url
+
+
 				response.append(game_dict)
 			game_collection = GameCollection.objects.filter(user=user)
 			if not game_collection:
@@ -229,5 +284,28 @@ class DiscoveryModeSwipe(APIView):
 						for cat in list(gameobj_dict['category']):
 							game_category[cat.id]=cat.category_name
 						gameobj_dict['category']= game_category
+
+						for artists in list(gameobj_dict['artist']):
+							artistss[artists.id]=artists.artist_name
+						gameobj_dict['artist'] = artistss
+				
+						for pub in list(gameobj_dict['publisher']):
+							publishers['pub.id']=pub.publisher_name
+						gameobj_dict['publisher'] = publishers
+						
+						for design in list(gameobj_dict['designer']):
+							designers[design.id] = design.designer_name
+						gameobj_dict['designer'] = designers
+						
+						for mecha in list(gameobj_dict['mechanism']):
+							mechanisms[mecha.id] = mecha.mechanism
+						gameobj_dict['mechanism'] = mechanisms
+
+
+						gameobj_dict['card_image'] = settings.MEDIA_ROOT+gameobj_dict['card_image'].url
+						gameobj_dict['swipe_image'] = settings.MEDIA_ROOT+gameobj_dict['swipe_image'].url
+						gameobj_dict['info_image'] = settings.MEDIA_ROOT+gameobj_dict['info_image'].url
+
+
 						response.append(gameobj_dict)
 		return JsonResponse(response, safe=False)
