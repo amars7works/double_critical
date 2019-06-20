@@ -177,9 +177,9 @@ class DiscoveryModeHotorNot(APIView):
 			for mecha in list(game_obj_dict['mechanism']):
 				mechanisms[mecha.id] = mecha.mechanism
 			game_obj_dict['mechanism'] = mechanisms
-			game_obj_dict['card_image'] = settings.MEDIA_ROOT+game_obj_dict['card_image'].url
-			game_obj_dict['swipe_image'] = settings.MEDIA_ROOT+game_obj_dict['swipe_image'].url
-			game_obj_dict['info_image'] = settings.MEDIA_ROOT+game_obj_dict['info_image'].url
+			game_obj_dict['card_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['card_image'].url
+			game_obj_dict['swipe_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['swipe_image'].url
+			game_obj_dict['info_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['info_image'].url
 			
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 			game_extend_obj_dict = model_to_dict(game_extend_obj)
@@ -255,10 +255,9 @@ class DiscoveryModeSwipe(APIView):
 					mechanisms[mecha.id] = mecha.mechanism
 					mechanisms_ids.append(mecha.id)
 				game_obj_dict['mechanism'] = mechanisms
-
-				game_obj_dict['card_image'] = settings.MEDIA_ROOT+game_obj_dict['card_image'].url
-				game_obj_dict['swipe_image'] = settings.MEDIA_ROOT+game_obj_dict['swipe_image'].url
-				game_obj_dict['info_image'] = settings.MEDIA_ROOT+game_obj_dict['info_image'].url
+				game_obj_dict['card_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['card_image'].url
+				game_obj_dict['swipe_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['swipe_image'].url
+				game_obj_dict['info_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['info_image'].url
 
 				response.append(game_obj_dict)
 			category_qs = GameCategory.objects.filter(id__in=set(category_ids))
@@ -286,9 +285,9 @@ class DiscoveryModeSwipe(APIView):
 					mechanisms[mecha.id] = mecha.mechanism
 				game_dict['mechanism'] = mechanisms
 
-				game_dict['card_image'] = settings.MEDIA_ROOT+game_dict['card_image'].url
-				game_dict['swipe_image'] = settings.MEDIA_ROOT+game_dict['swipe_image'].url
-				game_dict['info_image'] = settings.MEDIA_ROOT+game_dict['info_image'].url
+				game_obj_dict['card_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['card_image'].url
+				game_obj_dict['swipe_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['swipe_image'].url
+				game_obj_dict['info_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['info_image'].url
 
 
 				response.append(game_dict)
@@ -322,10 +321,8 @@ class DiscoveryModeSwipe(APIView):
 						gameobj_dict['mechanism'] = mechanisms
 
 
-						gameobj_dict['card_image'] = settings.MEDIA_ROOT+gameobj_dict['card_image'].url
-						gameobj_dict['swipe_image'] = settings.MEDIA_ROOT+gameobj_dict['swipe_image'].url
-						gameobj_dict['info_image'] = settings.MEDIA_ROOT+gameobj_dict['info_image'].url
-
-
+						game_obj_dict['card_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['card_image'].url
+						game_obj_dict['swipe_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['swipe_image'].url
+						game_obj_dict['info_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['info_image'].url
 						response.append(gameobj_dict)
 		return JsonResponse(response, safe=False)

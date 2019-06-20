@@ -21,6 +21,8 @@ DATABASES = {
        'NAME': base_dir_join('db.sqlite3'),
    }
 }
+
+ROOT_URL = "http://127.0.0.1:8000/"
 	
 # DATABASES = {
 #     'default': {
