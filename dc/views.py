@@ -11,6 +11,8 @@ from ugc.models import *
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
+from django.conf import settings
+
 
 class UserFollow(APIView):
 
@@ -134,25 +136,30 @@ class DiscoveryModeHotorNot(APIView):
 		try:
 			response = {}
 			categories = {}
+			artistss = {}
 			publishers = {}
-			Mechanisms = {}
-			artists = {}
-			designers ={}
+			designers = {}
+			mechanisms = {}
+			card_images = {}
+		
 			for cat in list(game_obj_dict['category']):
 				categories[cat.id]=cat.category_name
 			game_obj_dict['category'] = categories
+			for artists in list(game_obj_dict['artist']):
+				artistss[artists.id]=artists.artist_name
+			game_obj_dict['artist'] = artistss
 			for pub in list(game_obj_dict['publisher']):
-				publishers[pub.id]=pub.publisher_name
+				publishers['pub.id']=pub.publisher_name
 			game_obj_dict['publisher'] = publishers
-			for mec in list(game_obj_dict['mechanism']):
-				Mechanisms[mec.id]=mec.mechanism
-			game_obj_dict['mechanism'] = Mechanisms
-			for art in list(game_obj_dict['artist']):
-				artists[art.id]=art.artist_name
-			game_obj_dict['artist'] = artists
-			for dsg in list(game_obj_dict['designer']):
-				designers[dsg.id]=dsg.designer_name
+			for design in list(game_obj_dict['designer']):
+				designers[design.id] = design.designer_name
 			game_obj_dict['designer'] = designers
+			for mecha in list(game_obj_dict['mechanism']):
+				mechanisms[mecha.id] = mecha.mechanism
+			game_obj_dict['mechanism'] = mechanisms
+			game_obj_dict['card_image'] = settings.MEDIA_ROOT+game_obj_dict['card_image'].url
+			game_obj_dict['swipe_image'] = settings.MEDIA_ROOT+game_obj_dict['swipe_image'].url
+			game_obj_dict['info_image'] = settings.MEDIA_ROOT+game_obj_dict['info_image'].url
 			
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 			game_extend_obj_dict = model_to_dict(game_extend_obj)
