@@ -21,4 +21,6 @@ DATABASES = {
      }
 }
 
+ROOT_URL = "https://dc.s7works.io/"
+
 #config('ALLOWED_HOSTS', cast=Csv())

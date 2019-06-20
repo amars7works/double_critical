@@ -157,9 +157,9 @@ class CreateGame(APIView):
 			for mecha in list(game_obj_dict['mechanism']):
 				mechanisms[mecha.id] = mecha.mechanism
 			game_obj_dict['mechanism'] = mechanisms
-			game_obj_dict['card_image'] = settings.MEDIA_ROOT+game_obj_dict['card_image'].url
-			game_obj_dict['swipe_image'] = settings.MEDIA_ROOT+game_obj_dict['swipe_image'].url
-			game_obj_dict['info_image'] = settings.MEDIA_ROOT+game_obj_dict['info_image'].url
+			game_obj_dict['card_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['card_image'].url
+			game_obj_dict['swipe_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['swipe_image'].url
+			game_obj_dict['info_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['info_image'].url
 
 			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
 
