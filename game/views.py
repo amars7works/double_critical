@@ -474,3 +474,72 @@ class incement_like_count(APIView):
 				return Response(status=status.HTTP_200_OK)
 			except ObjectDoesNotExist:
 				return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class GameFeeds(APIView):
+	"""
+	parameter: game
+	getting the data, details like username, title, game name,
+	game description, game id and comment coiunt
+	return: game_dict 
+	"""
+	def get(self,request,format="json"):
+		following = User.objects.get(id=request.GET.get('following',None))
+		response = []
+		if following:
+			game_feed = Gamefeeds.objects.filter(user=following).order_by('-created_at')
+			for game_feed_obj in game_feed:
+				game_dict = {}
+				game_comments = Gamefeeds.objects.filter(game_title=game_feed_obj.game_title).count()
+
+				game_dict['game_title']=game_feed_obj.game_title
+				game_dict['user']=game_feed_obj.user.username
+				game_dict['comments_count']=game_comments
+				game_dict['game_id']=game_feed_obj.id
+				game_dict['game_description']=game_feed_obj.game_description
+				game_dict['like_count']=game_feed_obj.like_count
+				response.append(game_dict)
+			# return JsonResponse(game_dict,safe=False)
+		return Response(response, status = status.HTTP_200_OK)
+
+
+	"""
+	parameters: game, game_title, game_description
+	this methods will create game_title, game_description
+	it'll return game objects
+	"""
+	def post(self, request, format="json"):
+		user = User.objects.get(id=self.request.user.id)
+		game = Game.objects.get(id=request.data.get('game', None))
+		game_description = request.data.get('game_description', None)
+		game_title = request.data.get('game_title', None)
+		# like_count = request.data.get('like_count', None)
+
+		game_obj = Gamefeeds.objects.create(user=user, game=game,
+								game_title=game_title,
+								game_description=game_description)
+		return Response(status=status.HTTP_200_OK)
+
+	"""
+	this method will update the game description
+	"""
+	def put(self, request, format="json"):
+		user = User.objects.get(id=self.request.user.id)
+		game = Game.objects.get(id=request.data.get('game', None))
+		game_title = request.data.get('game_title', None)
+		game_description = request.data.get('game_description', None)
+		# like_count = request.data.get('like_count', None)
+
+		try:
+			game_obj = Gamefeeds.objects.get(user=user,game=game,
+								game_title=game_title)
+			if game_obj.game_description != game_description:
+				game_obj.game_description = game_description
+				game_obj.created_at=datetime.datetime.now()
+				game_obj.save()
+			else:
+				game_obj.created_at=datetime.datetime.now()
+				game_obj.save()
+			return Response(status=status.HTTP_200_OK)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
