@@ -15,15 +15,35 @@ from django.conf import settings
 
 
 class UserFollow(APIView):
-
 	def get(self,request,format="json"):
-		follower_user = User.objects.get(id=request.GET.get('follower', None))
-		qs = FollowUser.objects.filter(follower=follower_user)
+		user = User.objects.get(username = request.user)
+		my_follower_dict = {}
+		my_followings_dict = {}
+		my_follower = FollowUser.objects.filter(following=request.user)
+		for user in my_follower:
+			my_followers_follower = FollowUser.objects.filter(following = user.follower).count()
+			game = GameCollection.objects.filter(user = user.follower).count()
+			my_follower_dict[user.follower.username] = {
+				"username": user.follower.username,
+				"followers": my_followers_follower,
+				'GameCollections': game
+			}
 
-		response = [userfollow for userfollow in qs.values()]
+		my_following = FollowUser.objects.filter(follower=request.user)
+		for user in my_following:
+			my_followings_follower = FollowUser.objects.filter(following = user.following).count()		
+			game_coll = GameCollection.objects.filter(user = user.following).count()
+			my_followings_dict[user.following.username] = {
+				"username": user.following.username,
+				"followers": my_followings_follower,
+				'GameCollections': game_coll
+			}
 
-		return JsonResponse(response, safe=False)
-
+		data = {}
+		data['followers'] = my_follower_dict
+		data['followings'] = my_followings_dict
+		return Response(data, status = status.HTTP_200_OK)
+		
 	def post(self, request, format="json"):
 		follower_user = User.objects.get(id=self.request.user.id)
 		following_user = User.objects.get(id=request.data.get('following', None))
