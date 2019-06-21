@@ -292,7 +292,10 @@ class TrendingGames(APIView):
 					select={"count": 'like_count - dislike_count'}).order_by("-count", "name")
 
 		games = [game for game in game_qs.values()]
-
+		for g in games:
+			g['card_image'] = settings.ROOT_URL+'staticfiles/'+g['card_image']
+			g['swipe_image'] = settings.ROOT_URL+'staticfiles/'+g['swipe_image']
+			g['info_image'] = settings.ROOT_URL+'staticfiles/'+g['info_image']
 		# games = []
 		# for game_obj in game_qs:
 		# 	game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
