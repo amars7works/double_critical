@@ -57,30 +57,30 @@ class UserFollow(APIView):
 
 	def put(self, request, format="json"):
 		follower_user = User.objects.get(id=self.request.user.id)
-		following_user = User.objects.get(id=request.data.get('following', None))
-		follow = request.data.get('follow', None)
+		following_user = User.objects.get(username=request.data.get('following', None))
+		# follow = request.data.get('follow', None)
 		unfollow = request.data.get('unfollow', None)
 		try:
 			user_follow_obj = FollowUser.objects.get(
-							following=following_user,
+							# following=following_user,
 							follower=follower_user
 							)
 
-			if follow == 'False':
-				user_follow_obj.created_at=None
-				user_follow_obj.save()
+			# if follow == 'False':
+			# 	user_follow_obj.created_at=None
+			# 	user_follow_obj.save()
 
-			else:
-				user_follow_obj.created_at=datetime.datetime.now()
-				count_followr = 0
-				qs = FollowUser.objects.filter(follower=follower_user)
-				for userfollows in qs.values():
-					count = userfollows.get("follow_count")
-					if count == 0 or count == None:
-						count = 1
+			# else:
+			# 	user_follow_obj.created_at=datetime.datetime.now()
+			# 	count_followr = 0
+			# 	qs = FollowUser.objects.filter(follower=follower_user)
+			# 	for userfollows in qs.values():
+			# 		count = userfollows.get("follow_count")
+			# 		if count == 0 or count == None:
+			# 			count = 1
 
-				count_followr = count_followr + count
-				user_follow_obj.save()
+			# 	count_followr = count_followr + count
+			# 	user_follow_obj.save()
 
 			if unfollow  == 'True':
 				user_follow_obj.created_at=None
