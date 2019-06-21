@@ -14,6 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from django.conf import settings
+from dc.views import obj_to_dict
 
 class GameCorrection(APIView):
 
@@ -290,19 +291,9 @@ class TrendingGames(APIView):
 	def get(self,request,format="json"):
 		game_qs = Game.objects.filter(game_status="published").extra(
 					select={"count": 'like_count - dislike_count'}).order_by("-count", "name")
+		response = obj_to_dict(game_qs)
 
-		games = [game for game in game_qs.values()]
-		for g in games:
-			g['card_image'] = settings.ROOT_URL+'staticfiles/'+g['card_image']
-			g['swipe_image'] = settings.ROOT_URL+'staticfiles/'+g['swipe_image']
-			g['info_image'] = settings.ROOT_URL+'staticfiles/'+g['info_image']
-		# games = []
-		# for game_obj in game_qs:
-		# 	game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
-		# 	game_obj_dict = model_to_dict(game_obj)
-		# 	game_obj_dict.update(model_to_dict(game_extend_obj))
-
-		return JsonResponse(games, safe=False)
+		return JsonResponse(response, safe=False)
 
 class LikeGames(APIView):
 	def get(self,request,format="json"):

@@ -96,60 +96,54 @@ class UserFollow(APIView):
 class HotorNotSwipe(APIView):
 	def get(self,request,format="json"):
 		user = User.objects.get(id=self.request.user.id)
-		likegames = LikeGame.objects.filter(user=user)
-
-		response = []
-		game_ids = []
-		game_category = {}
-		artistss = {}
-		publishers = {}
-		designers = {}
-		mechanisms = {}
+		likegames = LikeGame.objects.filter(user=user)		
+		game_ids = []		
 		category_ids = []
 
 		if not likegames:
 			game_qs = Game.objects.filter(hotornot=True,game_status="published")
-			games = [game for game in game_qs.values()]
-			for g in games:
-				g['card_image'] = settings.ROOT_URL+'staticfiles/'+g['card_image']
-				g['swipe_image'] = settings.ROOT_URL+'staticfiles/'+g['swipe_image']
-				g['info_image'] = settings.ROOT_URL+'staticfiles/'+g['info_image']
-			response.append(games)
-
+			response = obj_to_dict(game_qs)
 		else:
 			for likegame in likegames:
-				game_ids.append(likegame.game.id)
-				
-			games = Game.objects.filter(game_status="published",hotornot=True).exclude(id__in=game_ids)
-			for game in games:
-				game_obj_dict = model_to_dict(game)
-				for cat in list(game_obj_dict['category']):
-					game_category[cat.id]=cat.category_name
-				game_obj_dict['category'] = game_category
-				
-				for des in list(game_obj_dict['designer']):
-						designers[des.id]=des.designer_name
-				game_obj_dict['designer'] = designers
-
-				for des in list(game_obj_dict['artist']):
-					artistss[des.id]=des.artist_name
-				game_obj_dict['artist'] = artistss
-
-				for des in list(game_obj_dict['publisher']):
-					publishers[des.id]=des.publisher_name
-				game_obj_dict['publisher'] = publishers
-
-				for des in list(game_obj_dict['mechanism']):
-					mechanisms[des.id]=des.mechanism
-				game_obj_dict['mechanism'] = mechanisms
-				game_obj_dict['card_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['card_image'].url
-				game_obj_dict['swipe_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['swipe_image'].url
-				game_obj_dict['info_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['info_image'].url
-				response.append(game_obj_dict)
-		
+				game_ids.append(likegame.game.id)				
+			games = Game.objects.filter(game_status="published",hotornot=True).exclude(
+				id__in=game_ids)			
+			response = obj_to_dict(games)		
 		return JsonResponse(response, safe=False)
 
-		# 		
+def obj_to_dict(games):
+	response = []
+	game_category = {}
+	artistss = {}
+	publishers = {}
+	designers = {}
+	mechanisms = {}
+	for game in games:
+		game_obj_dict = model_to_dict(game)
+		for cat in list(game_obj_dict['category']):
+			game_category[cat.id]=cat.category_name
+		game_obj_dict['category'] = game_category
+		
+		for des in list(game_obj_dict['designer']):
+				designers[des.id]=des.designer_name
+		game_obj_dict['designer'] = designers
+
+		for des in list(game_obj_dict['artist']):
+			artistss[des.id]=des.artist_name
+		game_obj_dict['artist'] = artistss
+
+		for des in list(game_obj_dict['publisher']):
+			publishers[des.id]=des.publisher_name
+		game_obj_dict['publisher'] = publishers
+
+		for des in list(game_obj_dict['mechanism']):
+			mechanisms[des.id]=des.mechanism
+		game_obj_dict['mechanism'] = mechanisms
+		game_obj_dict['card_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['card_image'].url
+		game_obj_dict['swipe_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['swipe_image'].url
+		game_obj_dict['info_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['info_image'].url
+		response.append(game_obj_dict)
+	return response	
 					
 
 		# 		# game_obj_dict['category']= game_category
