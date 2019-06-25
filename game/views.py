@@ -478,22 +478,28 @@ class GameFeeds(APIView):
 	return: game_dict 
 	"""
 	def get(self,request,format="json"):
-		following = User.objects.get(id=request.GET.get('following',None))
+		user = User.objects.get(username = request.user)
+		following = FollowUser.objects.filter(following=request.user)
+		follower = FollowUser.objects.filter(follower=request.user)
 		response = []
-		if following:
-			game_feed = Gamefeeds.objects.filter(user=following).order_by('-created_at')
-			for game_feed_obj in game_feed:
-				game_dict = {}
-				game_comments = Gamefeeds.objects.filter(game_title=game_feed_obj.game_title).count()
+		if user.following and user.follower: 
 
-				game_dict['game_title']=game_feed_obj.game_title
-				game_dict['user']=game_feed_obj.user.username
-				game_dict['comments_count']=game_comments
-				game_dict['game_id']=game_feed_obj.id
-				game_dict['game_description']=game_feed_obj.game_description
-				game_dict['like_count']=game_feed_obj.like_count
-				response.append(game_dict)
-			# return JsonResponse(game_dict,safe=False)
+			for user in following:
+				if user:
+					game_feed = Gamefeeds.objects.filter(user=user.follower).order_by('-created_at')					
+					# game_feeds = Gamefeeds.objects.filter(user=user.following).order_by('-created_at')					
+					
+					for game_feed_obj in game_feed:
+						game_dict = {}
+						game_comments = Gamefeeds.objects.filter(game_title=game_feed_obj.game_title).count()
+
+						game_dict['game_title']=game_feed_obj.game_title
+						game_dict['user']=game_feed_obj.user.username
+						game_dict['comments_count']=game_comments
+						game_dict['game_id']=game_feed_obj.id
+						game_dict['game_description']=game_feed_obj.game_description
+						game_dict['like_count']=game_feed_obj.like_count
+						response.append(game_dict)
 		return Response(response, status = status.HTTP_200_OK)
 
 
