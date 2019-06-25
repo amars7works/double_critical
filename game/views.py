@@ -105,6 +105,10 @@ class CollectingGame(APIView):
 
 		games = Game.objects.filter(name__in= game_name_list)
 		response = [game for game in games.values()]
+		for g in response:
+			g['card_image'] = settings.ROOT_URL+'staticfiles/'+g['card_image']
+			g['swipe_image'] = settings.ROOT_URL+'staticfiles/'+g['swipe_image']
+			g['info_image'] = settings.ROOT_URL+'staticfiles/'+g['info_image']
 		return JsonResponse(response, safe=False)
 
 	def post(self, request, format="json"):
