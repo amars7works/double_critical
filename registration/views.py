@@ -21,6 +21,7 @@ from dc.models import FollowUser
 from .custom_signals import post_registration_notify
 from .serializers import UserProfileSerializer,UserSerializer,GameCollectionSerializer
 from django.forms.models import model_to_dict
+from django.conf import settings
 
 
 
@@ -259,6 +260,7 @@ class UserProfile(APIView):
 
 		all_data = {}
 		all_data['username']=pdata['username']
+		all_data['profile_picture'] = settings.ROOT_URL+'staticfiles/'+pdata['avatar']
 		all_data['id']=pdata['id']
 		all_data['state']=pdata['state']
 		all_data['country']=pdata['country']

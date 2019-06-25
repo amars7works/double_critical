@@ -63,7 +63,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Profile
-		fields = ('id','user','state', 'country')
+		fields = ('id','user','state', 'country','avatar')
 
 class GameCollectionSerializer(serializers.ModelSerializer):
 	class Meta:
