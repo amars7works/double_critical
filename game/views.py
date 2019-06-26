@@ -114,7 +114,7 @@ class CollectingGame(APIView):
 		response_data = { "status": "game_not_found" }
 		try:
 			game_collection_obj = GameCollection.objects.get(game=game_id)
-			if not game_collected:
+			if game_collected:
 				game_collection_obj.created_at = None
 				game_collection_obj.delete()
 				response_data['status'] = "removed_from_collection"
@@ -126,7 +126,7 @@ class CollectingGame(APIView):
 			if game_collected:
 				game_collection_obj = GameCollection.objects.create(user=user,game=game_id)
 				response_data['status'] = "added_to_collection"
-		return Response(status=status.HTTP_200_OK)
+		return Response(response_data,status=status.HTTP_200_OK)
 
 
 class CreateGame(APIView):
