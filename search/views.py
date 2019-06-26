@@ -26,6 +26,6 @@ class Search(APIView):
 			if game_tag.game.id not in ids:
 				ids.append(game_tag.game.id)
 
-		games = [gameobj for gameobj in Game.objects.filter(id__in=ids).values()]
+		games = Game.objects.filter(id__in=ids)
 
 		return JsonResponse(obj_to_dict(games), safe=False)
