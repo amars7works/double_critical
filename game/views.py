@@ -105,12 +105,7 @@ class CollectingGame(APIView):
 				game_name_list.append(game_collected.game)
 
 		games = Game.objects.filter(name__in= game_name_list)
-		response = [game for game in games.values()]
-		for g in response:
-			g['card_image'] = settings.ROOT_URL+'staticfiles/'+g['card_image']
-			g['swipe_image'] = settings.ROOT_URL+'staticfiles/'+g['swipe_image']
-			g['info_image'] = settings.ROOT_URL+'staticfiles/'+g['info_image']
-		return JsonResponse(response, safe=False)
+		return JsonResponse(obj_to_dict(games), safe=False)
 
 	def post(self, request, format="json"):
 		user = User.objects.get(id=self.request.user.id)
@@ -136,43 +131,13 @@ class CollectingGame(APIView):
 
 class CreateGame(APIView):
 	def get(self, request, format="json"):
-		game_obj = Game.objects.get(id=request.GET.get('game', None))
-		game_obj_dict = model_to_dict(game_obj)
+		game_obj = Game.objects.filter(id=request.GET.get('game', None))
 		try:
 			response = {}
-			categories = {}
-			artistss = {}
-			publishers = {}
-			designers = {}
-			mechanisms = {}
-			card_images = {}
-		
-			for cat in list(game_obj_dict['category']):
-				categories[cat.id]=cat.category_name
-			game_obj_dict['category'] = categories
-			for artists in list(game_obj_dict['artist']):
-				artistss[artists.id]=artists.artist_name
-			game_obj_dict['artist'] = artistss
-			for pub in list(game_obj_dict['publisher']):
-				publishers['pub.id']=pub.publisher_name
-			game_obj_dict['publisher'] = publishers
-			for design in list(game_obj_dict['designer']):
-				designers[design.id] = design.designer_name
-			game_obj_dict['designer'] = designers
-			for mecha in list(game_obj_dict['mechanism']):
-				mechanisms[mecha.id] = mecha.mechanism
-			game_obj_dict['mechanism'] = mechanisms
-			game_obj_dict['card_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['card_image'].url
-			game_obj_dict['swipe_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['swipe_image'].url
-			game_obj_dict['info_image'] = settings.ROOT_URL+'staticfiles/'+game_obj_dict['info_image'].url
-
-			game_extend_obj = GameExtend.objects.get(game__name=game_obj.name)
-
+			response.update(obj_to_dict(game_obj)[0])
+			game_extend_obj = GameExtend.objects.get(game=game_obj[0])
 			game_extend_obj_dict = model_to_dict(game_extend_obj)
-
-			response.update(game_obj_dict)
 			response.update(game_extend_obj_dict)
-
 			return JsonResponse(response)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -310,6 +275,10 @@ class LikeGames(APIView):
 
 		game_qs = Game.objects.filter(id__in=games)
 		response = [game_obj for game_obj in game_qs.values()]
+		for g in response:
+			g['card_image'] = settings.ROOT_URL+'staticfiles/'+g['card_image']
+			g['swipe_image'] = settings.ROOT_URL+'staticfiles/'+g['swipe_image']
+			g['info_image'] = settings.ROOT_URL+'staticfiles/'+g['info_image']
 
 		return JsonResponse(response, safe=False)
 
@@ -394,28 +363,30 @@ class GameFollowingFeed(APIView):
 
 			if game_collection.created_at.date() == date_from.date() or datetime.date.today():
 				# if game_collection.game.id not in follow_game:
-				game_object = Game.objects.get(name=game_collection.game)
-				cat = {}
-				publishers = {}
-				Mechanisms = {}
-				artists = {}
-				designers ={}
-				response = model_to_dict(game_object)
-				for categiry in list(response['category']):
-					cat[categiry.id]=categiry.category_name
-				response['category'] = cat
-				for pub in list(response['publisher']):
-					publishers[pub.id]=pub.publisher_name
-				response['publisher'] = publishers
-				for mec in list(response['mechanism']):
-					Mechanisms[mec.id]=mec.mechanism
-				response['mechanism'] = Mechanisms
-				for art in list(response['artist']):
-					artists[art.id]=art.artist_name
-				response['artist'] = artists
-				for dsg in list(response['designer']):
-					designers[dsg.id]=dsg.designer_name
-				response['designer'] = designers
+				game_object = Game.objects.filter(name=game_collection.game)
+				response = []
+				response.append(obj_to_dict(game_object))
+				# cat = {}
+				# publishers = {}
+				# Mechanisms = {}
+				# artists = {}
+				# designers ={}
+				# response = model_to_dict(game_object)
+				# for categiry in list(response['category']):
+				# 	cat[categiry.id]=categiry.category_name
+				# response['category'] = cat
+				# for pub in list(response['publisher']):
+				# 	publishers[pub.id]=pub.publisher_name
+				# response['publisher'] = publishers
+				# for mec in list(response['mechanism']):
+				# 	Mechanisms[mec.id]=mec.mechanism
+				# response['mechanism'] = Mechanisms
+				# for art in list(response['artist']):
+				# 	artists[art.id]=art.artist_name
+				# response['artist'] = artists
+				# for dsg in list(response['designer']):
+				# 	designers[dsg.id]=dsg.designer_name
+				# response['designer'] = designers
 
 		return JsonResponse(response, safe=False)
 
@@ -430,7 +401,10 @@ class UserCommonGame(APIView):
 
 		games = Game.objects.filter(name__in=followgames)
 		response = [game for game in games.values()]
-
+		for g in response:
+			g['card_image'] = settings.ROOT_URL+'staticfiles/'+g['card_image']
+			g['swipe_image'] = settings.ROOT_URL+'staticfiles/'+g['swipe_image']
+			g['info_image'] = settings.ROOT_URL+'staticfiles/'+g['info_image']
 		return JsonResponse(response, safe=False)
 
 class BarCode(APIView):
