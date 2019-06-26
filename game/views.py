@@ -451,6 +451,20 @@ class GameFeeds(APIView):
 		following = FollowUser.objects.filter(following=request.user)
 		follower = FollowUser.objects.filter(follower=request.user)
 		response = []
+		if user:
+			user_feed = Gamefeeds.objects.get(user = user)
+			game_dict = {}
+			game_comments = Gamefeeds.objects.filter(game_title=user_feed.game_title).count()
+
+			game_dict['game_title']=user_feed.game_title
+			game_dict['user']=user_feed.user.username
+			game_dict['comments_count']=game_comments
+			game_dict['game_id']=user_feed.id
+			game_dict['game_description']=user_feed.game_description
+			game_dict['like_count']=user_feed.like_count
+			response.append(game_dict)
+
+
 		if user.following and user.follower: 
 
 			for user in following:
