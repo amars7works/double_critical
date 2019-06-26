@@ -10,5 +10,11 @@ class FollowUser(models.Model):
 	def __str__(self):
 		return self.follower.username
 
+	def get_follower(self):
+		return self.following.username
+
+	def get_following(self):
+		return self.follower.username
+
 	class Meta:
 		unique_together = ('follower', 'following')
