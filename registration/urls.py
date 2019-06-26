@@ -12,5 +12,6 @@ urlpatterns = [
 	url(r'api/users/google/login/$',views.Googlelogin.as_view(), name='google-login'),
 	url(r'api/users/facebook/login/$',views.Facebooklogin.as_view(), name='facebook-login'),
 	url(r'api/users/profile/$',views.UserProfile.as_view(), name = 'user_profile'),
+	url(r'api/users/follow/profile/$',views.FollowUserProfile.as_view(), name = 'feed-user_profile'),
 
 ]

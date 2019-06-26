@@ -268,3 +268,57 @@ class UserProfile(APIView):
 		all_data['follower']=dc_follower
 		all_data['following']=dc_following
 		return Response(all_data,status = status.HTTP_200_OK)
+
+
+class FollowUserProfile(APIView):
+	def get(self,request,format="json"):
+		user = User.objects.get(username = request.user)
+		
+		# for pro in profile:
+		my_follower_dict = {}
+		my_followings_dict = {}
+		my_follower = FollowUser.objects.filter(following=request.user)
+		user_feed= Gamefeeds.objects.get(user=user)
+		if user_feed:
+			for user in my_follower:
+				my_followers_follower = FollowUser.objects.filter(following = user.follower).count()
+				my_followers_following = FollowUser.objects.filter(follower = user.follower).count()
+				game = GameCollection.objects.filter(user = user.follower).count()
+				profile = Profile.objects.filter(user=user.follower)
+				pro = [pro for pro in profile]
+				my_follower_dict[user.follower.username] = {
+					"username": user.follower.username,
+					"state" : pro[0].state,
+					"country": pro[0].country,
+					"image": settings.ROOT_URL+'staticfiles/'+pro[0].avatar.url,
+					"followers": my_followers_follower,
+					"followings":my_followers_following,
+					'GameCollections': game
+				}
+			my_following = FollowUser.objects.filter(follower=request.user)
+			for user in my_following:
+				my_followings_follower = FollowUser.objects.filter(following = user.following).count()
+				my_followers_following = FollowUser.objects.filter(follower = user.follower).count()		
+				game_coll = GameCollection.objects.filter(user = user.following).count()
+				profile = Profile.objects.filter(user=user.following)
+				pro = [pro for pro in profile]
+				my_followings_dict[user.following.username] = {
+					"username": user.following.username,
+					"id" : user.following.id,
+					"state" : pro[0].state,
+					"country": pro[0].country,
+					"image": settings.ROOT_URL+'staticfiles/'+pro[0].avatar.url,
+					"followers": my_followings_follower,
+					"followings":my_followers_following,
+					'GameCollections': game_coll
+				}
+
+			data = {}
+			data['followers'] = my_follower_dict
+			data['followings'] = my_followings_dict
+		return Response(data, status = status.HTTP_200_OK)
+
+
+
+
+
