@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 
 from game.models import *
+from dc.views import *
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 
 class Search(APIView):
@@ -27,4 +28,4 @@ class Search(APIView):
 
 		games = [gameobj for gameobj in Game.objects.filter(id__in=ids).values()]
 
-		return JsonResponse(games, safe=False)
+		return JsonResponse(obj_to_dict(games), safe=False)
