@@ -275,7 +275,7 @@ class FollowUserProfile(APIView):
 	def get(self,request,format="json"):
 		user = User.objects.get(id=request.GET['user_id'])
 		my_follower_dict = {}
-		user_feed= Gamefeeds.objects.get(user=user)
+		user_feed= Gamefeeds.objects.filter(user=user)
 		
 		if user_feed:
 			my_followers_follower = FollowUser.objects.filter(following = user).count()
