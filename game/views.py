@@ -608,7 +608,7 @@ class GameComments(APIView):
 										game_title=game_title,
 										game_comment =game_comment)
 				game_obj.save()
-				
+			
 			except:
 				return Response(status=status.HTTP_200_OK)
 		return Response(status=status.HTTP_200_OK)
@@ -631,6 +631,47 @@ class GameComments(APIView):
 				game_comment_obj.created_at=datetime.datetime.now()
 				game_comment_obj.updated_at=datetime.datetime.now()
 				game_comment_obj.save()
+			return Response(status=status.HTTP_200_OK)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class GameCommentLike(APIView):
+	"""
+	parameters: game_comment, game
+	"""
+	def get(self, request, format="json"):
+		game_comment = Gamefeeds.objects.get(id=request.GET.get('game_comment', None))
+		game = Game.objects.get(id=request.GET.get('game', None))
+		game_comment_likes = Gamefeeds.objects.filter(game_comment=game_comment,
+									game=game)
+		response = []
+		for game_comment_like in game_comment_likes.values():
+			if game_comment_like['created_at']:
+				response.append(game_comment_like)
+
+		return JsonResponse(response, safe=False)
+
+	"""
+	parameters:game_comment,game_title,game,game_comment_like
+	if user like or dislike the comment the increase or decrease like count 
+	"""
+
+	def post(self, request, format="json"):
+		user = User.objects.filter(id=self.request.user.id)
+		game_comment_like = request.data.get('likes_count', None)
+		try:
+			game_comment_like_obj = Gamefeeds.objects.filter(id=request.data.get('game_comment', None))			
+			for comment_like in game_comment_like_obj:
+
+				if comment_like.like_count == game_comment_like:
+					comment_like.likes_count = game_comment_like
+					comment_like.like_count +=1
+					comment_like.save()
+
+				else:
+					comment_like.like_count -=1
+					comment_like.save()
+
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
