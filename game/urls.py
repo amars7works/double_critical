@@ -19,5 +19,6 @@ urlpatterns = [
 	url(r'api/game/barcode/$',views.BarCode.as_view(), name='barcode-game'),
 	url(r'api/game/increment/like/$',views.incement_like_count.as_view(), name='inc-like-game'),
 	url(r'api/game/feed/$',views.GameFeeds.as_view(), name='feed-game'),
+	url(r'api/game/feed/comment/$',views.GameComments.as_view(), name='feed-comment-game'),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
