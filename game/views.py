@@ -474,10 +474,12 @@ class GameFeeds(APIView):
 
 				game_dict['game_title']=user_feed.game_title
 				game_dict['user']=user_feed.user.username
+				game_dict['user_id']=user_feed.user.id
 				game_dict['comments_count']=game_comments
 				game_dict['game_id']=user_feed.id
 				game_dict['game_description']=user_feed.game_description
 				game_dict['like_count']=user_feed.like_count
+				game_dict['created_at'] = user_feed.created_at
 				response.append(game_dict)
 
 		common = (set(follower) & set(following))
@@ -495,10 +497,13 @@ class GameFeeds(APIView):
 
 						game_dict['game_title']=game_feed_obj.game_title
 						game_dict['user']=game_feed_obj.user.username
+						game_dict['user_id']=game_feed_obj.user.id
 						game_dict['comments_count']=game_comments
 						game_dict['game_id']=game_feed_obj.id
 						game_dict['game_description']=game_feed_obj.game_description
 						game_dict['like_count']=game_feed_obj.like_count
+						game_dict['created_at'] = game_feed_obj.created_at
+
 						response.append(game_dict)
 		return Response(response, status = status.HTTP_200_OK)
 
@@ -514,10 +519,13 @@ class GameFeeds(APIView):
 		game_description = request.data.get('game_description', None)
 		game_title = request.data.get('game_title', None)
 		# like_count = request.data.get('like_count', None)
-
+		# game_title.append(datetime.datetime.now())
 		game_obj = Gamefeeds.objects.create(user=user, game=game,
 								game_title=game_title,
 								game_description=game_description)
+		date_from = datetime.datetime.now() - datetime.timedelta(days=1)
+		game_obj.created_at.date() == date_from.date() or datetime.date.today()
+		game_obj.save()
 		return Response(status=status.HTTP_200_OK)
 
 	"""
