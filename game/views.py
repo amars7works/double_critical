@@ -400,11 +400,12 @@ class UserCommonGame(APIView):
 		followgames = list(set(follow_game.game.name for follow_game in follow_games))
 
 		games = Game.objects.filter(name__in=followgames)
-		response = [game for game in games.values()]
-		for g in response:
-			g['card_image'] = settings.ROOT_URL+'staticfiles/'+g['card_image']
-			g['swipe_image'] = settings.ROOT_URL+'staticfiles/'+g['swipe_image']
-			g['info_image'] = settings.ROOT_URL+'staticfiles/'+g['info_image']
+		# response = [game for game in games.values()]
+		# for g in response:
+		# 	g['card_image'] = settings.ROOT_URL+'staticfiles/'+g['card_image']
+		# 	g['swipe_image'] = settings.ROOT_URL+'staticfiles/'+g['swipe_image']
+		# 	g['info_image'] = settings.ROOT_URL+'staticfiles/'+g['info_image']
+		response = obj_to_dict(games)
 		return JsonResponse(response, safe=False)
 
 class BarCode(APIView):
