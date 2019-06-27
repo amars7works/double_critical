@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from dc.models import FollowUser
 from django.forms.models import model_to_dict
-
+import json
 
 
 class GameCategory(models.Model):
@@ -244,6 +244,11 @@ class Gamefeeds(models.Model):
 	class Meta:
 		unique_together = ('user', 'game', 'game_title')
 
+	def set_comment(self,x):
+		self.game_comment = json.dumps(x)
+
+	def get_comment(self):
+		return json.loads(self.game_comment)
 
 class GameFeed(models.Model):
 	object_type = models.CharField(max_length=30)

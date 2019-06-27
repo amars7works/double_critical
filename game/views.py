@@ -543,3 +543,86 @@ class GameFeeds(APIView):
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class GameComments(APIView):
+
+	"""
+	parameters: game
+	generating list of all comments of the game feed
+	"""
+	def get(self, request, format="json"):
+		# user = User.objects.get(id=self.request.user.id)
+		game = Game.objects.get(id=request.GET.get('game', None))
+		# game_title = GameFeed.objects.get(id=request.GET.get('game_title',None))
+		
+		game_comments = Gamefeeds.objects.filter(game__name=game.name
+								# game_title=game_title
+								).order_by('-created_at')
+		response = [game_comment for game_comment in game_comments.values()]
+
+		return JsonResponse(response, safe=False)
+
+	"""
+	parameters: game, game_comment
+	create: game_comment,user,game,game_title
+	return: status
+	"""
+
+	def post(self, request, format="json"):
+		user = User.objects.get(id=self.request.user.id)
+		game_title = Gamefeeds.objects.get(id=request.data.get('game_title', None))
+		game = Game.objects.get(id=request.data.get('game', None))
+		game_comment = []
+		game_comment.append(request.data.get('game_comment', None))
+		try:
+			try:
+				game_obj = Gamefeeds.objects.get(user=user,
+									game=game,
+									game_title=game_title,
+									game_comment = json.dumps(game_comment))
+			except:
+				game_obj = Gamefeeds.objects.get(user=user,
+									game=game,
+									game_title=game_title)
+			comment = json.loads(game_obj.game_comment)
+			game_comment.append(str(datetime.datetime.now()))
+			comment.append(game_comment)
+			
+			game_obj.game_comment = json.dumps(comment)
+			game_obj.save()
+		except:
+			try:
+				game_comment_time = game_comment.append(str(datetime.datetime.now()))
+				game_comment = json.dumps([game_comment])
+				game_obj = Gamefeeds.objects.create(user=user,
+										game=game,
+										game_title=game_title,
+										game_comment =game_comment)
+				game_obj.save()
+				
+			except:
+				return Response(status=status.HTTP_200_OK)
+		return Response(status=status.HTTP_200_OK)
+
+	def put(self, request, format="json"):
+		user = User.objects.get(id=self.request.user.id)
+		game_title = Gamefeeds.objects.get(id=request.data.get('game_title', None))
+		game = Game.objects.get(id=request.data.get('game', None))
+		game_comment = request.data.get('game_comment', None)
+		try:
+			game_comment_obj = Gamefeeds.objects.get(user=user,
+									game_title=game_title,
+									game=game)
+			if game_comment_obj.game_comment!=game_comment:
+				game_comment_obj.game_comment=game_comment
+				game_comment_obj.created_at=datetime.datetime.now()
+				game_comment_obj.updated_at=datetime.datetime.now()
+				game_comment_obj.save()
+			else:
+				game_comment_obj.created_at=datetime.datetime.now()
+				game_comment_obj.updated_at=datetime.datetime.now()
+				game_comment_obj.save()
+			return Response(status=status.HTTP_200_OK)
+		except ObjectDoesNotExist:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
