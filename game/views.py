@@ -62,6 +62,10 @@ class GameFollow(APIView):
 		response = []
 		for game_follow_obj in game_follow_qs.values():
 			if game_follow_obj['created_at']:
+				if game_follow_obj:
+					game_follow_obj['status'] = True
+				else:
+					game_follow_obj['status'] = False
 				response.append(game_follow_obj)
 
 		return JsonResponse(response, safe=False)
