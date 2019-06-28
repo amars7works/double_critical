@@ -270,6 +270,13 @@ class UserProfile(APIView):
 		all_data['following']=dc_following
 		return Response(all_data,status = status.HTTP_200_OK)
 
+	def post(self,request,format="json"):
+		user = User.objects.get(id=self.request.user.id)
+		avatar = request.data.get('image', None)
+
+		profile = Profile.objects.create(user=user,avatar=avatar)
+		return Response(status=status.HTTP_200_OK)
+
 
 class FollowUserProfile(APIView):
 	def get(self,request,format="json"):

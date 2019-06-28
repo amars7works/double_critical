@@ -229,11 +229,36 @@ class GameTag(models.Model):
 	class Meta:
 		unique_together = ('game', 'tag')
 
+
+
+class GameCommentReply(models.Model):
+	replyuser = models.ForeignKey(User, on_delete=models.CASCADE)
+	comment = models.CharField(blank =True, null =True,max_length = 250)
+	likes = models.IntegerField(default = 0)
+	profilePic = models.CharField(blank = True,null = True,max_length = 250)
+	replyCreatedAt = models.DateTimeField(auto_now_add=True, null=True)
+
+	def __str__(self):
+		return self.replyuser
+
+
+class GameComments(models.Model):
+	commentUser = models.ForeignKey(User, on_delete=models.CASCADE)
+	comment = models.CharField(blank =True, null =True,max_length = 250)
+	likes = models.IntegerField(default = 0)
+	commentCreatedAt = models.DateTimeField(auto_now_add=True, null=True)
+	commentUserPicture = models.CharField(blank = True,null = True,max_length = 250)
+	replyComments = models.ForeignKey(GameCommentReply,on_delete =models.CASCADE, null = True)
+
+	def __str__(self):
+		return self.commentUser
+
 class Gamefeeds(models.Model):
+	game_feed_id = models.IntegerField(blank=True,null=True)#AutoField(primary_key=True)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
 	game_title = models.CharField(max_length=30)
-	game_comment = models.TextField(blank=True,null=True)
+	comments = models.ForeignKey(GameComments,on_delete =models.CASCADE,null = True)
 	game_description = models.CharField(max_length=250)
 	like_count = models.IntegerField(blank=True,null=True)
 	created_at = models.DateTimeField(auto_now_add=True, null=True)

@@ -1,6 +1,7 @@
 import datetime
 import json
 from django.db.models import Q
+from django.db.models import Count
 from django.http import JsonResponse, HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -466,11 +467,13 @@ class GameFeeds(APIView):
 
 		follower = [x.get_follower() for x in FollowUser.objects.filter(follower=request.user)]
 		response = []
+		Gamefeeds.objects.annotate(number_of_comments = Count('comments'))
 		if user:
 			user_feedList = Gamefeeds.objects.filter(user = user)
 			for user_feed in user_feedList:
 				game_dict = {}
-				game_comments = Gamefeeds.objects.filter(game_title=user_feed.game_title).count()
+				game_comments = user_feed.number_of_comments
+				
 
 				game_dict['game_title']=user_feed.game_title
 				game_dict['user']=user_feed.user.username
@@ -493,7 +496,7 @@ class GameFeeds(APIView):
 					
 					for game_feed_obj in game_feed:
 						game_dict = {}
-						game_comments = Gamefeeds.objects.filter(game_title=game_feed_obj.game_title).count()
+						game_comments = game_feed_obj.number_of_comments
 
 						game_dict['game_title']=game_feed_obj.game_title
 						game_dict['user']=game_feed_obj.user.username
@@ -579,10 +582,16 @@ class GameComments(APIView):
 
 	def post(self, request, format="json"):
 		user = User.objects.get(id=self.request.user.id)
+		# game_feed_id = response.GET('game_feed_id')
 		game_title = Gamefeeds.objects.get(id=request.data.get('game_title', None))
 		game = Game.objects.get(id=request.data.get('game', None))
 		game_comment = []
 		game_comment.append(request.data.get('game_comment', None))
+		gamefeed = Gamefeeds.objects.get(user=user,
+									game=game,
+									game_title=game_title,
+									game_comment = json.dumps(game_comment))
+										# feed_id = game_feed_id)
 		try:
 			try:
 				game_obj = Gamefeeds.objects.get(user=user,
@@ -675,3 +684,24 @@ class GameCommentLike(APIView):
 			return Response(status=status.HTTP_200_OK)
 		except ObjectDoesNotExist:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class GameCommentsReplay(APIView):
+
+	"""
+	parameters: game
+	generating list of all comments of the game feed
+	"""
+	def get(self, request, format="json"):
+		user = User.objects.get(id=request.GET['user_id'])
+		print(user,"lllllllllllll")
+		game = Gamefeeds.objects.get(id=request.GET.get('game_id', None))
+		print(game,"lyyyyyyyyyyyyyyyyyyyyy")
+		# game_title = GameFeed.objects.get(id=request.GET.get('game_title',None))
+		
+		game_comments = Gamefeeds.objects.filter(game__name=game,
+								game_title=game_title
+								).order_by('-created_at')
+		response = [game_comment for game_comment in game_comments.values()]
+
+		return JsonResponse(response, safe=False)

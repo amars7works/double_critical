@@ -21,4 +21,7 @@ urlpatterns = [
 	url(r'api/game/feed/$',views.GameFeeds.as_view(), name='feed-game'),
 	url(r'api/game/feed/comment/$',views.GameComments.as_view(), name='feed-comment-game'),
 	url(r'api/game/feed/commentlike/$',views.GameCommentLike.as_view(), name='feed-commentlike-game'),
+	url(r'api/game/feed/comment/replay/$',views.GameCommentsReplay.as_view(), name='feed-comment-replay-game'),
+
+
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
